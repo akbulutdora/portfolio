@@ -30,6 +30,8 @@
   .project p { margin: 0 0 8px; }
   .links a { font-size: 14px; margin-right: 12px; }
   .thumb { width: 140px; height: 96px; background: var(--line); border-radius: 6px; object-fit: cover; display: block; }
+  .project.wide { grid-template-columns: 1fr; }
+  .project .toy { margin: 10px 0 12px; }
   @media (max-width: 560px) { .project { grid-template-columns: 1fr; } .thumb { width: 100%; height: 160px; } }
   .toy { position: relative; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #101012; aspect-ratio: 16 / 9; }
   .toy canvas { display: block; width: 100%; height: 100%; outline: none; }
@@ -59,22 +61,28 @@
 
   <h2 id="play">Play</h2>
   <p>This canvas is Odin and raylib compiled to WebAssembly. There is no engine underneath it. Every ball moves with the frame delta, so it runs the same at 30 Hz and 144 Hz. <a href="https://github.com/akbulutdora">Source</a>.</p>
-  <div class="toy" id="toy">
-    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
-    <div class="cover" id="cover">
-      <button id="play-btn">Play</button>
+  <div class="toy" data-wasm="toy" data-factory="createToy">
+    <canvas oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    <div class="cover">
+      <button>Play</button>
       <small>loads 400 KB of WebAssembly</small>
     </div>
   </div>
 
   <h2 id="projects">Projects</h2>
 
-  <article class="project">
-    <img class="thumb" alt="" src="img/mania.png" onerror="this.removeAttribute('src')">
+  <article class="project wide">
     <div>
       <h3>Mania</h3>
-      <div class="meta">Odin, raylib · game · in progress</div>
-      <p>A 2D game with no engine underneath. The entity system, the camera, the level editor, and the frame-rate independence are all hand-written. I ported it from a 2025 prototype to Odin and raylib, then added mechanics and levels.</p>
+      <div class="meta">Odin, raylib · game · in progress · playable below</div>
+      <p>A 2D game with no engine underneath. The entity system, the camera, the level editor, and the frame-rate independence are all hand-written. I ported it from a 2025 prototype to Odin and raylib, then added mechanics and levels. Every level that exists today is in this build.</p>
+      <div class="toy" data-wasm="mania" data-factory="createMania" data-size="2 MB">
+        <canvas oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+        <div class="cover">
+          <button>Play Mania</button>
+          <small>loads 2 MB · A/D move, space jumps, M for sound</small>
+        </div>
+      </div>
       <div class="links">
         <a href="https://akbulutdora.github.io/posts/mania_devlog/001_day_one.html">Devlog, 5 parts</a>
       </div>
@@ -138,60 +146,57 @@
 
 <script>
 (function () {
-  const btn = document.getElementById('play-btn');
-  const cover = document.getElementById('cover');
-  const box = document.getElementById('toy');
-  const canvas = document.getElementById('canvas');
+  const TITLE = document.title;
+  let odinReady = null;
+  const loadScript = src => new Promise((ok, err) => {
+    const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = err;
+    document.head.appendChild(el);
+  });
+  const GAME_KEYS = new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','a','d','e','m','A','D','E','M']);
 
-  function loadScript(src) {
-    return new Promise((ok, err) => {
-      const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = err;
-      document.head.appendChild(s);
-    });
-  }
-
-  function fitCanvas() {
-    const r = box.getBoundingClientRect();
-    canvas.width = Math.round(r.width); canvas.height = Math.round(r.height);
-  }
-
-  btn.addEventListener('click', async () => {
+  async function mount(box) {
+    const name = box.dataset.wasm, factory = box.dataset.factory;
+    const canvas = box.querySelector('canvas'), cover = box.querySelector('.cover'), btn = box.querySelector('button');
     btn.disabled = true; btn.textContent = 'Loading…';
-    await loadScript('toy/odin.js');
-    await loadScript('toy/toy.js');
+
+    odinReady = odinReady || loadScript('toy/odin.js');
+    await odinReady;
+    await loadScript(`${name}/${name}.js`);
 
     const mem = new odin.WasmMemoryInterface();
     mem.setIntSize(4);
     const odinImports = odin.setupDefaultImports(mem);
-    fitCanvas();
+    const fit = () => { const r = box.getBoundingClientRect(); canvas.width = Math.round(r.width); canvas.height = Math.round(r.height); };
+    fit();
 
-    let exportsRef = null;
-    await createToy({
+    let e = null;
+    await window[factory]({
       canvas,
       instantiateWasm: (imports, done) => {
-        WebAssembly.instantiateStreaming(fetch('toy/toy.wasm'), { ...odinImports, ...imports })
-          .then(out => {
-            const e = out.instance.exports;
-            mem.setExports(e); mem.setMemory(e.memory); exportsRef = e;
-            done(out.instance);
-          });
+        WebAssembly.instantiateStreaming(fetch(`${name}/${name}.wasm`), { ...odinImports, ...imports })
+          .then(out => { e = out.instance.exports; mem.setExports(e); mem.setMemory(e.memory); done(out.instance); });
         return {};
       },
       onRuntimeInitialized: () => {
-        const e = exportsRef;
-        e._start();
-        e.main_start();
-        const resize = () => { fitCanvas(); e.web_window_size_changed(canvas.width, canvas.height); };
-        window.addEventListener('resize', resize);
-        resize();
-        document.title = "Dora Akbulut";
+        e._start(); e.main_start();
+        const resize = () => { fit(); e.web_window_size_changed(canvas.width, canvas.height); };
+        window.addEventListener('resize', resize); resize();
+        document.title = TITLE;
         cover.remove();
+        canvas.addEventListener('keydown', ev => { if (GAME_KEYS.has(ev.key)) ev.preventDefault(); });
+        canvas.addEventListener('mousedown', () => canvas.focus());
         canvas.focus();
         const tick = () => { if (e.main_update()) requestAnimationFrame(tick); else { e.main_end(); e._end(); } };
         requestAnimationFrame(tick);
       },
       print: t => console.log(t),
     });
+  }
+
+  document.querySelectorAll('.toy[data-wasm]').forEach(box => {
+    box.querySelector('button').addEventListener('click', () => mount(box).catch(err => {
+      console.error(err); box.querySelector('small').textContent = 'failed to load: ' + err;
+    }));
   });
 })();
 </script>
