@@ -184,6 +184,7 @@
         const resize = () => { fitCanvas(); e.web_window_size_changed(canvas.width, canvas.height); };
         window.addEventListener('resize', resize);
         resize();
+        document.title = "Dora Akbulut";
         cover.remove();
         canvas.focus();
         const tick = () => { if (e.main_update()) requestAnimationFrame(tick); else { e.main_end(); e._end(); } };
