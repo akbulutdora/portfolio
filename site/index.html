@@ -38,6 +38,9 @@
   .toy .cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #cfcfcf; background: #101012; }
   .toy button { font: inherit; padding: 10px 18px; border-radius: 6px; border: 1px solid #444; background: #1c1c20; color: #eee; cursor: pointer; }
   .toy button:hover { background: #26262c; }
+  .toy .fs { position: absolute; right: 8px; bottom: 8px; padding: 6px 10px; font-size: 13px; opacity: 0; transition: opacity .15s; }
+  .toy:hover .fs, .toy:focus-within .fs { opacity: 1; }
+  .toy:fullscreen { border: 0; border-radius: 0; aspect-ratio: auto; width: 100vw; height: 100vh; }
   .toy small { color: #8a8a8a; font: 13px var(--mono); }
   .writing li { margin-bottom: 8px; }
   ul { padding-left: 20px; }
@@ -183,9 +186,21 @@
       onRuntimeInitialized: () => {
         e._start(); e.main_start();
         const resize = () => { fit(); e.web_window_size_changed(canvas.width, canvas.height); };
-        window.addEventListener('resize', resize); resize();
+        new ResizeObserver(resize).observe(box); resize();
         document.title = TITLE;
         cover.remove();
+        const fs = document.createElement('button');
+        fs.className = 'fs'; fs.textContent = 'Full screen'; fs.title = 'Esc leaves full screen';
+        fs.addEventListener('click', () => {
+          if (document.fullscreenElement) document.exitFullscreen(); else box.requestFullscreen();
+        });
+        box.appendChild(fs);
+        document.addEventListener('fullscreenchange', () => {
+          fs.textContent = document.fullscreenElement === box ? 'Exit full screen' : 'Full screen';
+          // Emscripten's GLFW also listens here and sets the canvas to the screen size. Re-apply after it.
+          requestAnimationFrame(() => requestAnimationFrame(resize));
+          canvas.focus();
+        });
         canvas.addEventListener('keydown', ev => { if (GAME_KEYS.has(ev.key)) ev.preventDefault(); });
         canvas.addEventListener('mousedown', () => canvas.focus());
         canvas.focus();
