@@ -196,8 +196,18 @@
         });
         canvas.addEventListener('keydown', ev => { if (GAME_KEYS.has(ev.key)) ev.preventDefault(); });
         canvas.addEventListener('mousedown', () => canvas.focus());
-        const tick = () => { if (e.main_update()) requestAnimationFrame(tick); else { e.main_end(); e._end(); } };
-        requestAnimationFrame(tick);
+        // Run the loop only while the box is on screen. Off screen, no frame is
+        // updated or drawn; the game resumes where it stopped when it scrolls back in.
+        let visible = false, running = false;
+        const tick = () => {
+          if (!visible) { running = false; return; }
+          box.dataset.frames = (+box.dataset.frames || 0) + 1;
+          if (e.main_update()) requestAnimationFrame(tick); else { running = false; e.main_end(); e._end(); }
+        };
+        new IntersectionObserver(([en]) => {
+          visible = en.isIntersecting;
+          if (visible && !running) { running = true; requestAnimationFrame(tick); }
+        }, { threshold: 0.05 }).observe(box);
       },
       print: t => console.log(t),
     });
