@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dora Akbulut</title>
+<meta name="description" content="Dora Akbulut, product engineer in London. Mobile apps, backend, and a game in Odin with no engine underneath.">
+<style>
+  :root {
+    --bg: #fbfaf7; --fg: #1b1b1b; --muted: #6b6b6b; --line: #e4e1da; --accent: #3f88c5;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #101012; --fg: #e8e6e1; --muted: #8f8d88; --line: #26262a; --accent: #6fb0e6; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 -apple-system, system-ui, "Inter", sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 56px 20px 96px; }
+  h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 56px 0 18px; }
+  p { margin: 0 0 12px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .lede { color: var(--muted); margin-bottom: 14px; }
+  nav a { margin-right: 18px; font-size: 15px; }
+  .project { display: grid; grid-template-columns: 140px 1fr; gap: 18px; padding: 18px 0; border-top: 1px solid var(--line); }
+  .project:last-child { border-bottom: 1px solid var(--line); }
+  .project h3 { font-size: 17px; margin: 0 0 4px; }
+  .project .meta { font: 13px var(--mono); color: var(--muted); }
+  .project p { margin: 0 0 8px; }
+  .links a { font-size: 14px; margin-right: 12px; }
+  .thumb { width: 140px; height: 96px; background: var(--line); border-radius: 6px; object-fit: cover; display: block; }
+  @media (max-width: 560px) { .project { grid-template-columns: 1fr; } .thumb { width: 100%; height: 160px; } }
+  .toy { position: relative; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #101012; aspect-ratio: 16 / 9; }
+  .toy canvas { display: block; width: 100%; height: 100%; outline: none; }
+  .toy .cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #cfcfcf; background: #101012; }
+  .toy button { font: inherit; padding: 10px 18px; border-radius: 6px; border: 1px solid #444; background: #1c1c20; color: #eee; cursor: pointer; }
+  .toy button:hover { background: #26262c; }
+  .toy small { color: #8a8a8a; font: 13px var(--mono); }
+  .writing li { margin-bottom: 8px; }
+  ul { padding-left: 20px; }
+  footer { margin-top: 64px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Dora Akbulut</h1>
+    <p class="lede">Product engineer in London. I build the whole thing: the data model, the API, the app, and most of the time the design. I care about performance and design because the user feels both.</p>
+    <nav>
+      <a href="#projects">Projects</a>
+      <a href="#play">Play</a>
+      <a href="#writing">Writing</a>
+      <a href="https://github.com/akbulutdora">GitHub</a>
+      <a href="https://akbulutdora.github.io">Blog</a>
+      <a href="mailto:akbulutdora@gmail.com">Email</a>
+    </nav>
+  </header>
+
+  <h2 id="play">Play</h2>
+  <p>This canvas is Odin and raylib compiled to WebAssembly. There is no engine underneath it. Every ball moves with the frame delta, so it runs the same at 30 Hz and 144 Hz. <a href="https://github.com/akbulutdora">Source</a>.</p>
+  <div class="toy" id="toy">
+    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    <div class="cover" id="cover">
+      <button id="play-btn">Play</button>
+      <small>loads 400 KB of WebAssembly</small>
+    </div>
+  </div>
+
+  <h2 id="projects">Projects</h2>
+
+  <article class="project">
+    <img class="thumb" alt="" src="img/mania.png" onerror="this.removeAttribute('src')">
+    <div>
+      <h3>Mania</h3>
+      <div class="meta">Odin, raylib · game · in progress</div>
+      <p>A 2D game with no engine underneath. The entity system, the camera, the level editor, and the frame-rate independence are all hand-written. I ported it from a 2025 prototype to Odin and raylib, then added mechanics and levels.</p>
+      <div class="links">
+        <a href="https://akbulutdora.github.io/posts/mania_devlog/001_day_one.html">Devlog, 5 parts</a>
+      </div>
+    </div>
+  </article>
+
+  <article class="project">
+    <img class="thumb" alt="" src="img/dikte.png" onerror="this.removeAttribute('src')">
+    <div>
+      <h3>Dikte</h3>
+      <div class="meta">Swift, SwiftUI · Mac and iOS · AI</div>
+      <p>A dictation app for Mac and iOS. It syncs the clipboard between the two over iCloud. On iOS it adds a custom keyboard with special actions for typing on a phone.</p>
+    </div>
+  </article>
+
+  <article class="project">
+    <img class="thumb" alt="" src="img/quickers.png" onerror="this.removeAttribute('src')">
+    <div>
+      <h3>Quickers</h3>
+      <div class="meta">mobile · WhatsApp bot · AI</div>
+      <p>A sticker app with no advertisements. Send a photo or a video to the WhatsApp bot and it returns a sticker. It also has a share sheet and quick media editing.</p>
+    </div>
+  </article>
+
+  <article class="project">
+    <img class="thumb" alt="" src="img/next-one.png" onerror="this.removeAttribute('src')">
+    <div>
+      <h3>Next One</h3>
+      <div class="meta">Swift, SwiftUI · iOS</div>
+      <p>A todo app that shows one task at a time. It gives you the current task and the one after it, never a list. It syncs over iCloud.</p>
+    </div>
+  </article>
+
+  <article class="project">
+    <img class="thumb" alt="" src="img/coolwave.png" onerror="this.removeAttribute('src')">
+    <div>
+      <h3>Coolwave</h3>
+      <div class="meta">mobile · maps</div>
+      <p>A place finder that searches by purpose instead of by category: a toilet that stocks period products, or a cafe with air conditioning to work from.</p>
+    </div>
+  </article>
+
+  <h2>Work</h2>
+  <ul>
+    <li><strong>ooba</strong>, Founder in Residence, Feb 2026 to present. The only technical person on a consumer social product. PostgreSQL, Laravel, React Native, LLM pipelines.</li>
+    <li><strong>meti-bills</strong>, freelance, 2023 and 2025 to 2026. E-invoicing on the Peppol network for a Belgian accountancy practice. Go, PostgreSQL, React.</li>
+    <li><strong>Net Koruma</strong>, Software Engineer. <strong>Upcarta</strong>, Mobile Lead and Co-founder. <strong>University of Kent</strong>, Visiting Researcher.</li>
+  </ul>
+
+  <h2 id="writing">Writing</h2>
+  <ul class="writing">
+    <li><a href="https://akbulutdora.github.io/posts/mania_devlog/001_day_one.html">Mania devlog</a>: entity systems, frame-rate independence, platform tiles. 5 parts.</li>
+    <li><a href="https://akbulutdora.github.io">Does the shift from behavioral AI to deep learning constitute a Kuhnian paradigm shift?</a> Term paper.</li>
+    <li><a href="https://akbulutdora.github.io">Open source software and the Triple Helix model of science.</a> Term paper.</li>
+  </ul>
+
+  <footer>
+    <a href="mailto:akbulutdora@gmail.com">akbulutdora@gmail.com</a> · <a href="https://github.com/akbulutdora">github.com/akbulutdora</a>
+  </footer>
+</main>
+
+<script>
+(function () {
+  const btn = document.getElementById('play-btn');
+  const cover = document.getElementById('cover');
+  const box = document.getElementById('toy');
+  const canvas = document.getElementById('canvas');
+
+  function loadScript(src) {
+    return new Promise((ok, err) => {
+      const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = err;
+      document.head.appendChild(s);
+    });
+  }
+
+  function fitCanvas() {
+    const r = box.getBoundingClientRect();
+    canvas.width = Math.round(r.width); canvas.height = Math.round(r.height);
+  }
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true; btn.textContent = 'Loading…';
+    await loadScript('toy/odin.js');
+    await loadScript('toy/toy.js');
+
+    const mem = new odin.WasmMemoryInterface();
+    mem.setIntSize(4);
+    const odinImports = odin.setupDefaultImports(mem);
+    fitCanvas();
+
+    let exportsRef = null;
+    await createToy({
+      canvas,
+      instantiateWasm: (imports, done) => {
+        WebAssembly.instantiateStreaming(fetch('toy/toy.wasm'), { ...odinImports, ...imports })
+          .then(out => {
+            const e = out.instance.exports;
+            mem.setExports(e); mem.setMemory(e.memory); exportsRef = e;
+            done(out.instance);
+          });
+        return {};
+      },
+      onRuntimeInitialized: () => {
+        const e = exportsRef;
+        e._start();
+        e.main_start();
+        const resize = () => { fitCanvas(); e.web_window_size_changed(canvas.width, canvas.height); };
+        window.addEventListener('resize', resize);
+        resize();
+        cover.remove();
+        canvas.focus();
+        const tick = () => { if (e.main_update()) requestAnimationFrame(tick); else { e.main_end(); e._end(); } };
+        requestAnimationFrame(tick);
+      },
+      print: t => console.log(t),
+    });
+  });
+})();
+</script>
+</body>
+</html>
