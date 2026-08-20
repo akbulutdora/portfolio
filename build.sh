@@ -18,4 +18,4 @@ emcc -o "$OUT/toy.js" "$OUT/toy.wasm.o" "$ODIN_ROOT/vendor/raylib/wasm/libraylib
   -sUSE_GLFW=3 -sWASM_BIGINT -sWARN_ON_UNDEFINED_SYMBOLS=0 \
   -sMODULARIZE=1 -sEXPORT_NAME=createToy -sENVIRONMENT=web -O2
 rm "$OUT/toy.wasm.o"
-echo "ok: $OUT/toy.js $OUT/toy.wasm"
+./hash_outputs.sh toy

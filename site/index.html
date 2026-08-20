@@ -159,9 +159,11 @@
     const canvas = box.querySelector('canvas'), cover = box.querySelector('.cover'), btn = box.querySelector('button');
     btn.disabled = true; btn.textContent = 'Loading…';
 
+    const assets = await (await fetch('assets.json', { cache: 'no-cache' })).json();
+    const files = assets[name];
     odinReady = odinReady || loadScript('toy/odin.js');
     await odinReady;
-    await loadScript(`${name}/${name}.js`);
+    await loadScript(files.js);
 
     const mem = new odin.WasmMemoryInterface();
     mem.setIntSize(4);
@@ -172,8 +174,9 @@
     let e = null;
     await window[factory]({
       canvas,
+      locateFile: f => f.endsWith('.wasm') ? files.wasm : `${name}/${f}`,
       instantiateWasm: (imports, done) => {
-        WebAssembly.instantiateStreaming(fetch(`${name}/${name}.wasm`), { ...odinImports, ...imports })
+        WebAssembly.instantiateStreaming(fetch(files.wasm), { ...odinImports, ...imports })
           .then(out => { e = out.instance.exports; mem.setExports(e); mem.setMemory(e.memory); done(out.instance); });
         return {};
       },

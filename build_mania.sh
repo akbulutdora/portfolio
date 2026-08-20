@@ -24,4 +24,4 @@ emcc -o "$OUT/mania.js" "$OUT/mania.wasm.o" \
   -sEXPORTED_RUNTIME_METHODS=HEAPF32 \
   -sMODULARIZE=1 -sEXPORT_NAME=createMania -sENVIRONMENT=web -O2
 rm "$OUT/mania.wasm.o"
-echo "ok: $(du -sh "$OUT/mania.wasm" | cut -f1) $OUT/mania.wasm"
+./hash_outputs.sh mania

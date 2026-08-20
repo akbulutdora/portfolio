@@ -1,0 +1,13 @@
+# Netlify / Cloudflare Pages format. Ignored by other hosts.
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+/*.wasm
+  Cache-Control: public, max-age=31536000, immutable
+/toy/odin.js
+  Cache-Control: public, max-age=86400
+/assets.json
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/
+  Cache-Control: no-cache
