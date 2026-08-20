@@ -66,10 +66,7 @@
   <p>This canvas is Odin and raylib compiled to WebAssembly. There is no engine underneath it. Every ball moves with the frame delta, so it runs the same at 30 Hz and 144 Hz. <a href="https://github.com/akbulutdora">Source</a>.</p>
   <div class="toy" data-wasm="toy" data-factory="createToy">
     <canvas oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
-    <div class="cover">
-      <button>Play</button>
-      <small>loads 400 KB of WebAssembly</small>
-    </div>
+    <div class="cover"><small>loading</small></div>
   </div>
 
   <h2 id="projects">Projects</h2>
@@ -77,14 +74,11 @@
   <article class="project wide">
     <div>
       <h3>Mania</h3>
-      <div class="meta">Odin, raylib · game · in progress · playable below</div>
+      <div class="meta">Odin, raylib · game · in progress · playable below, sound on with M</div>
       <p>A 2D game with no engine underneath. The entity system, the camera, the level editor, and the frame-rate independence are all hand-written. I ported it from a 2025 prototype to Odin and raylib, then added mechanics and levels. Every level that exists today is in this build.</p>
       <div class="toy" data-wasm="mania" data-factory="createMania" data-size="2 MB">
         <canvas oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
-        <div class="cover">
-          <button>Play Mania</button>
-          <small>loads 2 MB · A/D move, space jumps, M for sound</small>
-        </div>
+        <div class="cover"><small>loading · A/D move, space jumps, M for sound</small></div>
       </div>
       <div class="links">
         <a href="https://akbulutdora.github.io/posts/mania_devlog/001_day_one.html">Devlog, 5 parts</a>
@@ -159,8 +153,7 @@
 
   async function mount(box) {
     const name = box.dataset.wasm, factory = box.dataset.factory;
-    const canvas = box.querySelector('canvas'), cover = box.querySelector('.cover'), btn = box.querySelector('button');
-    btn.disabled = true; btn.textContent = 'Loading…';
+    const canvas = box.querySelector('canvas'), cover = box.querySelector('.cover');
 
     const assets = await (await fetch('assets.json', { cache: 'no-cache' })).json();
     const files = assets[name];
@@ -203,7 +196,6 @@
         });
         canvas.addEventListener('keydown', ev => { if (GAME_KEYS.has(ev.key)) ev.preventDefault(); });
         canvas.addEventListener('mousedown', () => canvas.focus());
-        canvas.focus();
         const tick = () => { if (e.main_update()) requestAnimationFrame(tick); else { e.main_end(); e._end(); } };
         requestAnimationFrame(tick);
       },
@@ -211,10 +203,11 @@
     });
   }
 
-  document.querySelectorAll('.toy[data-wasm]').forEach(box => {
-    box.querySelector('button').addEventListener('click', () => mount(box).catch(err => {
-      console.error(err); box.querySelector('small').textContent = 'failed to load: ' + err;
-    }));
+  // Start after the page has painted; one canvas at a time so the first one shows sooner.
+  window.addEventListener('load', async () => {
+    for (const box of document.querySelectorAll('.toy[data-wasm]')) {
+      await mount(box).catch(err => { console.error(err); box.querySelector('small').textContent = 'failed to load: ' + err; });
+    }
   });
 })();
 </script>
