@@ -65,12 +65,15 @@
     </div>
   </article>
 
-  <article class="project">
-    <img class="thumb" alt="" src="img/coolwave.png" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb'}))">
+  <article class="project wide">
     <div>
       <h3>Coolwave</h3>
-      <div class="meta">mobile · maps</div>
-      <p>A place finder that searches by purpose instead of by category: a toilet that stocks period products, or a cafe with air conditioning to work from.</p>
+      <div class="meta">Expo, React Native · Laravel API · iOS and web · usable below</div>
+      <p>A place finder that searches by purpose instead of by category: a toilet that stocks period products, or a cafe with air conditioning to work from. This is the production app, exported for the web and talking to the production API.</p>
+      <div class="phone" data-src="/coolwave/">
+        <button>Open Coolwave</button>
+        <small>loads 5 MB</small>
+      </div>
     </div>
   </article>
 
@@ -178,6 +181,15 @@
       print: t => console.log(t),
     });
   }
+
+  // Phone frames: load the iframe on click.
+  document.querySelectorAll('.phone[data-src]').forEach(box => {
+    box.querySelector('button').addEventListener('click', () => {
+      const f = document.createElement('iframe');
+      f.src = box.dataset.src; f.title = 'Coolwave'; f.allow = 'geolocation';
+      box.replaceChildren(f);
+    });
+  });
 
   // Start after the page has painted; one canvas at a time so the first one shows sooner.
   window.addEventListener('load', async () => {
