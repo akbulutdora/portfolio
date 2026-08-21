@@ -34,6 +34,12 @@
   .toy:hover .fs, .toy:focus-within .fs { opacity: 1; }
   .toy:fullscreen { border: 0; border-radius: 0; aspect-ratio: auto; width: 100vw; height: 100vh; }
   .toy small { color: #8a8a8a; font: 13px var(--mono); }
+  .work { list-style: none; padding: 0; margin: 0; }
+  .work li { display: grid; grid-template-columns: 140px 1fr; gap: 16px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .work li:last-child { border-bottom: 1px solid var(--line); }
+  .work .when { font: 13px var(--mono); color: var(--muted); padding-top: 4px; }
+  .work .what { color: var(--muted); font-size: 15px; }
+  @media (max-width: 560px) { .work li { grid-template-columns: 1fr; gap: 2px; } }
   .writing li { margin-bottom: 8px; }
   .writing .meta { color: var(--muted); font-size: 14px; }
   ul { padding-left: 20px; }
