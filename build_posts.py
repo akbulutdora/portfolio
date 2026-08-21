@@ -45,6 +45,18 @@ def fix_links(body: str, src_rel: Path) -> str:
 def nice_date(d: date) -> str:
     return d.strftime("%-d %b %Y")
 
+def version_css():
+    """Cloudflare caches .css for 4 h whatever the origin says; a content hash in the
+    query string makes every change take effect at once."""
+    import hashlib
+    css = ROOT / "site" / "style.css"
+    h = hashlib.sha256(css.read_bytes()).hexdigest()[:8]
+    for f in (ROOT / "site").rglob("*.html"):
+        txt = f.read_text()
+        new = re.sub(r'href="/style\.css(\?v=[0-9a-f]+)?"', f'href="/style.css?v={h}"', txt)
+        if new != txt:
+            f.write_text(new)
+
 def build():
     man = tomllib.loads((SRC / "manifest.toml").read_text())
     OUT.mkdir(parents=True, exist_ok=True)
@@ -97,6 +109,7 @@ def build():
     s, n = re.subn(r'<ul class="writing">.*?</ul>(\n  <p><a href="/posts/">All writing</a></p>)?', block, s, count=1, flags=re.S)
     assert n == 1, "Writing block not found in index.html"
     idx.write_text(s)
+    version_css()
     total = sum(len(x["posts"]) for x in sections)
     print(f"built {total} posts in {len(sections)} sections")
 
