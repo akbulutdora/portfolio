@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dora Akbulut</title>
 <meta name="description" content="Dora Akbulut, product engineer in London. Mobile apps, backend, and a game in Odin with no engine underneath.">
-<link rel="stylesheet" href="/style.css?v=6a9e4306">
+<link rel="stylesheet" href="/style.css?v=b54193c3">
 </head>
 <body>
 <main>
@@ -13,10 +13,11 @@
     <h1>Dora Akbulut</h1>
     <p class="lede">Product engineer in London. I build the whole thing: the data model, the API, the app, and most of the time the design. I care about performance and design because the user feels both.</p>
     <nav>
-      <a href="#projects">Projects</a>
-      <a href="/posts/">Writing</a>
+      <a href="mailto:akbulutdora@gmail.com">akbulutdora@gmail.com</a>
       <a href="https://github.com/akbulutdora">GitHub</a>
-      <a href="mailto:akbulutdora@gmail.com">Email</a>
+      <a href="#projects">Projects</a>
+      <a href="#work">Work</a>
+      <a href="#writing">Writing</a>
     </nav>
   </header>
 
@@ -73,7 +74,7 @@
     </div>
   </article>
 
-  <h2>Work</h2>
+  <h2 id="work">Work</h2>
   <ol class="work">
     <li><span class="when">2026 to now</span><div><strong>ooba</strong> · Founder in Residence<br><span class="what">The only technical person on a consumer social product. PostgreSQL, Laravel, React Native, LLM pipelines.</span></div></li>
     <li><span class="when">2023 · 2025 to 2026</span><div><strong>meti-bills</strong> · Software Engineer, freelance<br><span class="what">E-invoicing on the Peppol network for a Belgian accountancy practice. Go, PostgreSQL, React.</span></div></li>
@@ -83,16 +84,23 @@
   </ol>
 
   <h2 id="writing">Writing</h2>
-  <ul class="writing">
-    <li><strong>Mania devlog</strong>: <a href="/posts/mania_devlog/001_day_one.html">day one: dev environment, camera zoom, frame-rate independence, mood states</a> <span class="meta">and 4 more</span></li>
-    <li><strong>Philosophy</strong>: <a href="/posts/philosophy/001_foss_thm.html">Open Source Software and the Triple Helix Model of Science</a> <span class="meta">and 1 more</span></li>
-    <li><strong>Learning Rust</strong>: <a href="/posts/rust/001_mpbt.html">Passing messages between threads</a> <span class="meta">and 2 more</span></li>
-    <li><strong>Flutter</strong>: <a href="/posts/flutter/001_input_toolbar.html">Implementing an Input Toolbar in Flutter</a></li>
-    <li><strong>Developer</strong>: <a href="/posts/developer/gq.html">Job application questions I liked</a> <span class="meta">and 2 more</span></li>
-    <li><strong>Tricks</strong>: <a href="/posts/tricks/001_post_files_through_curl.html">POST a file with curl</a> <span class="meta">and 1 more</span></li>
-  </ul>
-  <p><a href="/posts/">All writing</a></p>
-
+  <!-- writing:start -->
+  <h3>Mania devlog</h3>
+  <p class="section-blurb">A game in Odin on raylib with no engine underneath, built in sessions.</p>
+  <ul class="post-list"><li><span class="date">30 May 2025</span><a href="/posts/mania_devlog/001_day_one.html">day one: dev environment, camera zoom, frame-rate independence, mood states</a></li><li><span class="date">31 May 2025</span><a href="/posts/mania_devlog/002_day_two.html">day two: automatic hot reload, smashing jump, player states</a></li><li><span class="date">3 Jun 2025</span><a href="/posts/mania_devlog/003_day_three.html">day three: handle-based entity system, reading game data from json</a></li><li><span class="date">6 Jun 2025</span><a href="/posts/mania_devlog/004.ui_for_letters.html">day four: letter ui, scaling the ui, displaying collected letters and disabling input</a></li><li><span class="date">10 Jun 2025</span><a href="/posts/mania_devlog/005.platform_tiles_and_inspired_special.html">day five: platform tiles &amp; inspired special</a></li></ul>
+  <h3>Philosophy</h3>
+  <p class="section-blurb">Two term papers from Sabancı University.</p>
+  <ul class="post-list"><li><span class="date">1 Jun 2022</span><a href="/posts/philosophy/001_foss_thm.html">Open Source Software and the Triple Helix Model of Science</a></li><li><span class="date">1 Dec 2022</span><a href="/posts/philosophy/002_ai_kuhn.html">Does the Shift from Behavioral AI to Deep Learning Constitute a Kuhnian Paradigm Shift?</a></li></ul>
+  <h3>Learning Rust</h3>
+  <p class="section-blurb">A beginner&#x27;s log from 2023: channels, then an actor model.</p>
+  <ul class="post-list"><li><span class="date">25 May 2023</span><a href="/posts/rust/001_mpbt.html">Passing messages between threads</a></li><li><span class="date">1 Jun 2023</span><a href="/posts/rust/002_requesting_arbitrary_data.html">Requesting arbitrary data over a channel</a></li><li><span class="date">21 Jul 2023</span><a href="/posts/rust/003_generic_actor_model.html">A generic actor model for concurrency</a></li></ul>
+  <h3>Flutter</h3>
+  <ul class="post-list"><li><span class="date">10 Aug 2023</span><a href="/posts/flutter/001_input_toolbar.html">Implementing an Input Toolbar in Flutter</a></li></ul>
+  <h3>Developer</h3>
+  <ul class="post-list"><li><span class="date">26 May 2023</span><a href="/posts/developer/gq.html">Job application questions I liked</a></li><li><span class="date">26 May 2023</span><a href="/posts/developer/bluecode.html">Bluecode&#x27;s application questions</a></li><li><span class="date">26 May 2023</span><a href="/posts/developer/wingback.html">Wingback&#x27;s application questions</a></li></ul>
+  <h3>Tricks</h3>
+  <ul class="post-list"><li><span class="date">24 Aug 2023</span><a href="/posts/tricks/001_post_files_through_curl.html">POST a file with curl</a></li><li><span class="date">6 Jun 2025</span><a href="/posts/tricks/002_compress_a_video_with_ffmpeg.html">Compress a video with ffmpeg</a></li></ul>
+  <!-- writing:end -->
   <footer>
     <a href="mailto:akbulutdora@gmail.com">akbulutdora@gmail.com</a> · <a href="https://github.com/akbulutdora">github.com/akbulutdora</a>
   </footer>

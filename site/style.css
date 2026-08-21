@@ -40,8 +40,6 @@
   .work .when { font: 13px var(--mono); color: var(--muted); padding-top: 4px; }
   .work .what { color: var(--muted); font-size: 15px; }
   @media (max-width: 560px) { .work li { grid-template-columns: 1fr; gap: 2px; } }
-  .writing li { margin-bottom: 8px; }
-  .writing .meta { color: var(--muted); font-size: 14px; }
   ul { padding-left: 20px; }
   footer { margin-top: 64px; color: var(--muted); font-size: 14px; }
 
@@ -62,7 +60,8 @@ article.post .footnotes { font-size: 14px; color: var(--muted); border-top: 1px 
 .crumbs { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
 .crumbs a { color: var(--muted); }
 .post-list { list-style: none; padding: 0; margin: 0 0 8px; }
-.post-list li { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 6px 0; }
+.post-list li { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 4px 0; }
+  main > h3 { font-size: 15px; margin: 26px 0 6px; }
 .post-list .date { font: 13px var(--mono); color: var(--muted); padding-top: 3px; }
 .section-blurb { color: var(--muted); margin: -10px 0 10px; font-size: 15px; }
 /* pandoc highlight classes */

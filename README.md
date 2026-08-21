@@ -23,6 +23,6 @@ that gives hashed files a 1-year immutable header, and `index.html` plus `assets
 
 Markdown sources live in `posts/`, listed in `posts/manifest.toml` (section, date, title).
 `./build_posts.py` renders them with pandoc into `site/posts/` (same paths as the old
-GitHub Pages site), writes `site/posts/index.html`, and refreshes the Writing section of
+GitHub Pages site), and refreshes the Writing section of
 `site/index.html`. To add a post: drop the `.md` in `posts/<section>/`, add a line to the
 manifest, run the script.

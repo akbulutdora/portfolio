@@ -23,7 +23,7 @@ PAGE = """<!doctype html>
 </head>
 <body>
 <main>
-<nav class="crumbs"><a href="/">{site}</a> / <a href="/posts/">Writing</a>{crumb}</nav>
+<nav class="crumbs"><a href="/">{site}</a> / <a href="/#writing">Writing</a>{crumb}</nav>
 {body}
 </main>
 </body>
@@ -83,32 +83,24 @@ def build():
             posts.append({"title": title, "date": d, "url": "/posts/" + out.relative_to(OUT).as_posix()})
         sections.append({**sec, "posts": posts})
 
-    # Writing index page.
-    parts = ['<h1>Writing</h1>']
-    for sec in sections:
-        parts.append(f'<h2>{html.escape(sec["name"])}</h2>')
-        if sec.get("blurb"):
-            parts.append(f'<p class="section-blurb">{html.escape(sec["blurb"])}</p>')
-        parts.append('<ul class="post-list">' + "".join(
-            f'<li><span class="date">{nice_date(p["date"])}</span><a href="{p["url"]}">{html.escape(p["title"])}</a></li>'
-            for p in sec["posts"]) + '</ul>')
-    (OUT / "index.html").write_text(PAGE.format(title="Writing", site=SITE_TITLE,
-        description="Devlog, term papers, and notes by Dora Akbulut.", crumb="", body="\n".join(parts)))
-
-    # Writing section on the home page: every section, its posts collapsed to one line.
+    # Writing section on the home page: every section with every post.
     idx = ROOT / "site" / "index.html"
     s = idx.read_text()
-    items = []
+    parts = []
     for sec in sections:
-        first = sec["posts"][0]
-        n = len(sec["posts"])
-        more = f' <span class="meta">and {n-1} more</span>' if n > 1 else ""
-        items.append(f'    <li><strong>{html.escape(sec["name"])}</strong>: <a href="{first["url"]}">{html.escape(first["title"])}</a>{more}</li>')
-    block = ('<ul class="writing">\n' + "\n".join(items) +
-             '\n  </ul>\n  <p><a href="/posts/">All writing</a></p>')
-    s, n = re.subn(r'<ul class="writing">.*?</ul>(\n  <p><a href="/posts/">All writing</a></p>)?', block, s, count=1, flags=re.S)
-    assert n == 1, "Writing block not found in index.html"
+        parts.append(f'  <h3>{html.escape(sec["name"])}</h3>')
+        if sec.get("blurb"):
+            parts.append(f'  <p class="section-blurb">{html.escape(sec["blurb"])}</p>')
+        parts.append('  <ul class="post-list">' + "".join(
+            f'<li><span class="date">{nice_date(p["date"])}</span><a href="{p["url"]}">{html.escape(p["title"])}</a></li>'
+            for p in sec["posts"]) + '</ul>')
+    block = "  <!-- writing:start -->\n" + "\n".join(parts) + "\n  <!-- writing:end -->"
+    s, n = re.subn(r'  <!-- writing:start -->.*?<!-- writing:end -->', block, s, count=1, flags=re.S)
+    assert n == 1, "writing markers not found in index.html"
     idx.write_text(s)
+    old_index = OUT / "index.html"
+    if old_index.exists():
+        old_index.unlink()
     version_css()
     total = sum(len(x["posts"]) for x in sections)
     print(f"built {total} posts in {len(sections)} sections")
