@@ -28,7 +28,6 @@ PAGE = """<!doctype html>
 <meta property="og:image" content="https://thoughtassault.dev/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/style.css">
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token": "677d0c70caa6464b9dc0569ef1c0a923"}}'></script>
 </head>
 <body>
 <main>
