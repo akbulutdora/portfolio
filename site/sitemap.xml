@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://thoughtassault.dev/</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/mania_devlog/001_day_one.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/mania_devlog/002_day_two.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/mania_devlog/003_day_three.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/mania_devlog/004.ui_for_letters.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/mania_devlog/005.platform_tiles_and_inspired_special.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/philosophy/001_foss_thm.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/philosophy/002_ai_kuhn.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/rust/001_mpbt.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/rust/002_requesting_arbitrary_data.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/rust/003_generic_actor_model.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/flutter/001_input_toolbar.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/developer/gq.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/developer/bluecode.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/developer/wingback.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/tricks/001_post_files_through_curl.html</loc></url>
+  <url><loc>https://thoughtassault.dev/posts/tricks/002_compress_a_video_with_ffmpeg.html</loc></url>
+</urlset>

@@ -4,8 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dora Akbulut</title>
-<meta name="description" content="Dora Akbulut, product engineer in London. Mobile apps, backend, and a game in Odin with no engine underneath.">
-<link rel="stylesheet" href="/style.css?v=f3c41d82">
+<meta name="description" content="Dora Akbulut, engineer in London. Consumer and business products, a playable game in Odin with no engine underneath, and writing.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://thoughtassault.dev/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dora Akbulut">
+<meta property="og:description" content="Engineer in London. Consumer and business products, a playable game in Odin with no engine underneath, and writing.">
+<meta property="og:url" content="https://thoughtassault.dev/">
+<meta property="og:image" content="https://thoughtassault.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/style.css?v=66aadfcb">
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "677d0c70caa6464b9dc0569ef1c0a923"}'></script>
 </head>
 <body>
 <main>
@@ -39,7 +50,7 @@
   </article>
 
   <article class="project">
-    <img class="thumb" alt="" src="img/dikte.png" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb'}))">
+    <img class="thumb" alt="Dikte on an iPhone" src="img/dikte.png" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb'}))">
     <div>
       <h3>Dikte</h3>
       <div class="meta">Swift, SwiftUI · Mac and iOS · AI</div>
@@ -48,16 +59,17 @@
   </article>
 
   <article class="project">
-    <img class="thumb" alt="" src="img/quickers.png" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb'}))">
+    <img class="thumb" alt="Quickers on an iPhone" src="img/quickers.png" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb'}))">
     <div>
       <h3>Quickers</h3>
       <div class="meta">mobile · WhatsApp bot · AI</div>
       <p>A sticker app with no advertisements. Send a photo or a video to the WhatsApp bot and it returns a sticker. It also has a share sheet and quick media editing.</p>
+      <div class="links"><a href="https://testflight.apple.com/join/cWD3YKS3">Install with TestFlight</a></div>
     </div>
   </article>
 
   <article class="project">
-    <img class="thumb" alt="" src="img/next-one.png" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb'}))">
+    <img class="thumb" alt="Next One on an iPhone" src="img/next-one.png" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb'}))">
     <div>
       <h3>Next One</h3>
       <div class="meta">Swift, SwiftUI · iOS</div>
@@ -74,6 +86,7 @@
         <button>Open Coolwave</button>
         <small>loads 5 MB</small>
       </div>
+      <div class="links"><a href="https://testflight.apple.com/join/sZDPYCzX">Install with TestFlight</a></div>
     </div>
   </article>
 
@@ -191,12 +204,22 @@
     });
   });
 
-  // Start after the page has painted; one canvas at a time so the first one shows sooner.
-  window.addEventListener('load', async () => {
+  // Start after the page has painted; one canvas at a time. With prefers-reduced-motion,
+  // nothing moves until the reader asks for it.
+  const startAll = async () => {
     for (const box of document.querySelectorAll('.toy[data-wasm]')) {
       await mount(box).catch(err => { console.error(err); box.querySelector('small').textContent = 'failed to load: ' + err; });
     }
-  });
+  };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.toy[data-wasm] .cover').forEach(cover => {
+      const b = document.createElement('button'); b.textContent = 'Play';
+      b.addEventListener('click', () => mount(cover.parentElement), { once: true });
+      cover.prepend(b);
+    });
+  } else {
+    window.addEventListener('load', startAll);
+  }
 })();
 </script>
 </body>

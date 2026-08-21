@@ -19,7 +19,16 @@ PAGE = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title} · {site}</title>
 <meta name="description" content="{description}">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://thoughtassault.dev{url}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{description}">
+<meta property="og:url" content="https://thoughtassault.dev{url}">
+<meta property="og:image" content="https://thoughtassault.dev/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/style.css">
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token": "677d0c70caa6464b9dc0569ef1c0a923"}}'></script>
 </head>
 <body>
 <main>
@@ -78,9 +87,10 @@ def build():
             out.parent.mkdir(parents=True, exist_ok=True)
             article = (f'<article class="post"><h1>{html.escape(title)}</h1>'
                        f'<span class="date">{nice_date(d)} · {html.escape(sec["name"])}</span>\n{body}</article>')
+            url = "/posts/" + out.relative_to(OUT).as_posix()
             out.write_text(PAGE.format(title=html.escape(title), site=SITE_TITLE, description=html.escape(desc),
-                                       crumb=f' / {html.escape(sec["name"])}', body=article))
-            posts.append({"title": title, "date": d, "url": "/posts/" + out.relative_to(OUT).as_posix()})
+                                       crumb=f' / {html.escape(sec["name"])}', body=article, url=url))
+            posts.append({"title": title, "date": d, "url": url})
         sections.append({**sec, "posts": posts})
 
     # Writing section on the home page: every section with every post.
@@ -102,6 +112,10 @@ def build():
     if old_index.exists():
         old_index.unlink()
     version_css()
+    # sitemap.xml: home page plus every post.
+    urls = ["https://thoughtassault.dev/"] + ["https://thoughtassault.dev" + p["url"] for sec in sections for p in sec["posts"]]
+    (ROOT / "site" / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "".join(f"  <url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n")
     total = sum(len(x["posts"]) for x in sections)
     print(f"built {total} posts in {len(sections)} sections")
 
