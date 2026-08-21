@@ -1,0 +1,58 @@
+# Sections in display order. Each post: source path under posts/, date of first
+# publication, and an optional title that replaces the H1. Output path mirrors the
+# source path, so the URLs match the old GitHub Pages site.
+
+[[section]]
+name = "Mania devlog"
+slug = "mania_devlog"
+blurb = "A game in Odin on raylib with no engine underneath, built in sessions."
+posts = [
+  { src = "mania_devlog/001_day_one.md", date = "2025-05-30" },
+  { src = "mania_devlog/002_day_two.md", date = "2025-05-31" },
+  { src = "mania_devlog/003_day_three.md", date = "2025-06-03" },
+  { src = "mania_devlog/004.ui_for_letters.md", date = "2025-06-06" },
+  { src = "mania_devlog/005.platform_tiles_and_inspired_special.md", date = "2025-06-10" },
+]
+
+[[section]]
+name = "Philosophy"
+slug = "philosophy"
+blurb = "Two term papers from Sabancı University."
+posts = [
+  { src = "philosophy/001_foss_thm.md", date = "2022-06-01", title = "Open Source Software and the Triple Helix Model of Science" },
+  { src = "philosophy/002_ai_kuhn.md", date = "2022-12-01", title = "Does the Shift from Behavioral AI to Deep Learning Constitute a Kuhnian Paradigm Shift?" },
+]
+
+[[section]]
+name = "Learning Rust"
+slug = "rust"
+blurb = "A beginner's log from 2023: channels, then an actor model."
+posts = [
+  { src = "rust/001_mpbt.md", date = "2023-05-25", title = "Passing messages between threads" },
+  { src = "rust/002_requesting_arbitrary_data.md", date = "2023-06-01", title = "Requesting arbitrary data over a channel" },
+  { src = "rust/003_generic_actor_model.md", date = "2023-07-21", title = "A generic actor model for concurrency" },
+]
+
+[[section]]
+name = "Flutter"
+slug = "flutter"
+posts = [
+  { src = "flutter/001_input_toolbar.md", date = "2023-08-10" },
+]
+
+[[section]]
+name = "Developer"
+slug = "developer"
+posts = [
+  { src = "developer/gq.md", date = "2023-05-26" },
+  { src = "developer/bluecode.md", date = "2023-05-26", title = "Bluecode's application questions" },
+  { src = "developer/wingback.md", date = "2023-05-26", title = "Wingback's application questions" },
+]
+
+[[section]]
+name = "Tricks"
+slug = "tricks"
+posts = [
+  { src = "tricks/001_post_files_through_curl.md", date = "2023-08-24", title = "POST a file with curl" },
+  { src = "tricks/002_compress_a_video_with_ffmpeg.md", date = "2025-06-06", title = "Compress a video with ffmpeg" },
+]

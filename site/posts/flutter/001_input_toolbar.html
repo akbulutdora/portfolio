@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Implementing an Input Toolbar in Flutter · Dora Akbulut</title>
+<meta name="description" content="This post is about implementing an input toolbar to add images to a post, just like how it works in Twitter, Whatsapp, or other apps. I&#x27;m writing this quick pos">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+<nav class="crumbs"><a href="/">Dora Akbulut</a> / <a href="/posts/">Writing</a> / Flutter</nav>
+<article class="post"><h1>Implementing an Input Toolbar in Flutter</h1><span class="date">10 Aug 2023 · Flutter</span>
+
+<p>This post is about implementing an input toolbar to add images to a post, just like how it works in Twitter, Whatsapp, or other apps. I'm writing this quick post for one of my teammates at Upcarta. I will be brief and won't go into many details.</p>
+<p>Here is our view. We wrap the view itself and the input toolbar with a <code>Column</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode dart"><code class="sourceCode dart"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">return</span> Scaffold(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>      appBar<span class="op">:</span> AppBar(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        title<span class="op">:</span> Text(<span class="st">&#39;Ticket #${ticket.ticketId}&#39;</span>)<span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        actions<span class="op">:</span> [</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>          _CloseTicketButton(ticket)<span class="op">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        ]<span class="op">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>      )<span class="op">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>      body<span class="op">:</span> Column(</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        children<span class="op">:</span> <span class="op">&lt;</span>Widget<span class="op">&gt;</span>[</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>          _View(ticket<span class="op">:</span> ticket)<span class="op">.</span>expand()<span class="op">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>          <span class="co">// The input toolbar and button</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>          _TextingKeyboard(ticket<span class="op">:</span> ticket)<span class="op">,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        ]<span class="op">,</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>      )<span class="op">,</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    );</span></code></pre></div>
+<p>Here is what the input toolbar looks like. I've omitted a lot of it for the sake of simplicity. You should adjust the paddings, etc. for yourself. One difficulty I had was adjusting the paddings and the sizes of the input toolbar widgets. One good option could be turning this whole view into a reusable compontent.</p>
+<p>Note that I use my own widget extensions instead of <code>Padding</code>, <code>Flexible</code> and <code>Expanded</code> widgets. I think they keep the widget tree cleaner. But they are nothing special.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode dart"><code class="sourceCode dart"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">@override</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  Widget build(BuildContext context) <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> SafeArea(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>      minimum<span class="op">:</span> <span class="at">const</span> EdgeInsets<span class="op">.</span>only(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        bottom<span class="op">:</span> kVerticalPaddingSmall<span class="op">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        left<span class="op">:</span> kHorizontalPaddingSmall<span class="op">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        right<span class="op">:</span> kHorizontalPaddingSmall<span class="op">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>      )<span class="op">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>      child<span class="op">:</span> Row(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        crossAxisAlignment<span class="op">:</span> CrossAxisAlignment<span class="op">.</span>end<span class="op">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        children<span class="op">:</span> <span class="op">&lt;</span>Widget<span class="op">&gt;</span>[</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>          ConstrainedBox(</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            constraints<span class="op">:</span> <span class="at">const</span> BoxConstraints(</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>              minHeight<span class="op">:</span> <span class="dv">36</span><span class="op">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>            )<span class="op">,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            child<span class="op">:</span> TextField(<span class="op">...</span>)<span class="op">,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>          )<span class="op">.</span>flex()<span class="op">,</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>          <span class="at">const</span> SizedBox(width<span class="op">:</span> <span class="dv">4</span>)<span class="op">,</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>          <span class="co">// Button</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>          SizedBox<span class="op">.</span>square(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>            dimension<span class="op">:</span> <span class="dv">36</span><span class="op">,</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>            child<span class="op">:</span> IconButton<span class="op">.</span>filled(</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>              padding<span class="op">:</span> <span class="at">const</span> EdgeInsets<span class="op">.</span>all(kVerticalPaddingSmall)<span class="op">,</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>              onPressed<span class="op">:</span> () <span class="op">{...},</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>              icon<span class="op">:</span> <span class="at">const</span> Icon(</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>                Icons<span class="op">.</span>send<span class="op">,</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>                size<span class="op">:</span> <span class="dv">20</span><span class="op">,</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>                color<span class="op">:</span> AppColors<span class="op">.</span>white<span class="op">,</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>              )<span class="op">,</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>            )<span class="op">,</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>          )<span class="op">,</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        ]<span class="op">,</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>      )<span class="op">.</span>padding(top<span class="op">:</span> kVerticalPaddingSmall)<span class="op">,</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    )<span class="op">.</span>backgroundColor(AppColors<span class="op">.</span>red[<span class="dv">3</span>]<span class="op">!</span>);</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+<p>We are not done yet. The <code>_View</code>, which is the widget that actually shows the view itself should be wrapped into a <code>SingleChildScrollView</code> or some other scrollable. This is necessary because we want to have the keyboard take up space in the screen, limiting the size of the view, and turning it into a scrollable widget where it sits. Here is what I went with:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode dart"><code class="sourceCode dart"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">return</span> SingleChildScrollView(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>      padding<span class="op">:</span> <span class="at">const</span> EdgeInsets<span class="op">.</span>only(bottom<span class="op">:</span> <span class="dv">56</span>)<span class="op">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>      keyboardDismissBehavior<span class="op">:</span> ScrollViewKeyboardDismissBehavior<span class="op">.</span>onDrag<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>      child<span class="op">:</span> Column(</span></code></pre></div>
+</article>
+</main>
+</body>
+</html>

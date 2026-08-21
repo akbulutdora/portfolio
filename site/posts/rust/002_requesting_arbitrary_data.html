@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requesting arbitrary data over a channel · Dora Akbulut</title>
+<meta name="description" content="In the previous exercise, I implemented a simple program where a client and server ran asynchronously and communicated by passing messages. This time, the clien">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+<nav class="crumbs"><a href="/">Dora Akbulut</a> / <a href="/posts/">Writing</a> / Learning Rust</nav>
+<article class="post"><h1>Requesting arbitrary data over a channel</h1><span class="date">1 Jun 2023 · Learning Rust</span>
+
+<p>In the previous exercise, I implemented a simple program where a client and server ran asynchronously and communicated by passing messages. This time, the client will send arbitrary queries to the server to execute.</p>
+<hr />
+<h2 id="design">Design</h2>
+<h3 id="server">Server</h3>
+<ul>
+<li>The server holds a mutable database. To keep things simple, this is a simple data structure. There is information about the ice cream the server has such as the existing flavors, their recipes, existing orders and which flavors they are in, etc. The database fields are as follows:
+<ul>
+<li><code>flavors_stock: Vec&lt;String&gt;</code> -&gt; represents the flavors in stock.</li>
+<li><code>flavor_recipes: HashMap&lt;String, Vec&lt;String&gt;&gt;</code> -&gt; represents the recipes of each flavor (it is guaranteed that the existing flavors can only be flavors from this list).</li>
+<li>I can add more later if I like.</li>
+</ul></li>
+<li>The database is initialized upon <code>run_server()</code>. When it receives a request, it calls the closure sent with the request on the database.</li>
+<li>The server doesn't deal with error handling. It returns a <code>Result</code> to the client. The content of the result will be of the generic type passed from the client.</li>
+</ul>
+<h3 id="client">Client</h3>
+<ul>
+<li>The client sends queries to the server. The <code>ClientRequest</code> consists of a one-shot channel and query. The query is a <code>FnOnce</code> function that takes the server's data as a reference (<code>&amp;Database</code>), and the return type is arbitrary. I think I can achieve this using a generic type and trait bounds (Even though I understand generics, trait objects and traits, I still need to figure this out).</li>
+<li>For example, the client can query the database for how many different flavors it has (integer), which flavors do not have dairy in their recipes (list of strings), and more.</li>
+</ul>
+<p>A simple diagram of the communication process I made GPT draw for me:</p>
+<pre><code>+---------+                           +--------+
+|         | --(1) Prepare Query-----&gt; |        |
+|  Client |                           | Server |
+|         |                           |        |
++---------+                           +--------+
+                                       |
+                                       V
+                             (2) Execute Query on Database
+                                       |
+                                       V
++---------+                           +--------+
+|         | &lt;---(3) Send Result ----- |        |
+|  Client |                           | Server |
+|         |                           |        |
++---------+                           +--------+
+</code></pre>
+<hr />
+<h2 id="implementation">Implementation</h2>
+<h3 id="first-attempt">First attempt</h3>
+<p>The <code>Query</code> struct and its methods lie at the heart of this task. So let's take a look at my first implementation:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> Query <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    tx<span class="op">:</span> <span class="pp">oneshot::</span>Sender<span class="op">&lt;</span><span class="dt">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="bu">Any</span> <span class="op">+</span> <span class="bu">Send</span><span class="op">&gt;&gt;,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    f<span class="op">:</span> <span class="dt">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="bu">FnMut</span>(<span class="op">&amp;</span>Database) <span class="op">-&gt;</span> <span class="dt">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="bu">Any</span> <span class="op">+</span> <span class="bu">Send</span><span class="op">&gt;</span> <span class="op">+</span> <span class="bu">Send</span><span class="op">&gt;,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Query <span class="op">{</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// used by the server</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> <span class="kw">fn</span> execute(<span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> database<span class="op">:</span> <span class="op">&amp;</span>Database) <span class="op">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> result <span class="op">=</span> (<span class="kw">self</span><span class="op">.</span>f)(database)<span class="op">;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> _ <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>tx<span class="op">.</span>send(result)<span class="op">;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// used by the client</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> <span class="kw">fn</span> new<span class="op">&lt;</span>F<span class="op">&gt;</span>(f<span class="op">:</span> F) <span class="op">-&gt;</span> (<span class="dt">Self</span><span class="op">,</span> <span class="pp">oneshot::</span>Receiver<span class="op">&lt;</span><span class="dt">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="bu">Any</span> <span class="op">+</span> <span class="bu">Send</span><span class="op">&gt;&gt;</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">where</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        F<span class="op">:</span> <span class="bu">FnMut</span>(<span class="op">&amp;</span>Database) <span class="op">-&gt;</span> <span class="dt">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="bu">Any</span> <span class="op">+</span> <span class="bu">Send</span><span class="op">&gt;</span> <span class="op">+</span> <span class="bu">Send</span> <span class="op">+</span> <span class="ot">&#39;static</span><span class="op">,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> (tx<span class="op">,</span> rx) <span class="op">=</span> <span class="pp">oneshot::</span>channel()<span class="op">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> f <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(f)<span class="op">;</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> query <span class="op">=</span> <span class="dt">Self</span> <span class="op">{</span> tx<span class="op">,</span> f <span class="op">};</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        (query<span class="op">,</span> rx)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>My first approach was to have the one-shot channel and closure that is sent as fields of the query. This felt natural and intuitive. The client creates a <code>Query</code> using the <code>new</code> constructor, boxes the closure to store it and returns the query as well as the one-shot channel for the response. The role of the server is to execute the given closure. The execute method is also responsible for sending the result back to the client, so the server is completely blind to the inner workings of the query or the client. But this created an indirect and verbose implementation.</p>
+<p>I could implement the server as I expected: But the client side didn't go as expected. It worked, but it was not simple at all.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> f<span class="op">:</span> <span class="dt">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="bu">FnMut</span>(<span class="op">&amp;</span>Database) <span class="op">-&gt;</span> <span class="dt">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="bu">Any</span> <span class="op">+</span> <span class="bu">Send</span><span class="op">&gt;</span> <span class="op">+</span> <span class="bu">Send</span><span class="op">&gt;</span> <span class="op">=</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Box</span><span class="pp">::</span>new(<span class="kw">move</span> <span class="op">|</span>database<span class="op">:</span> <span class="op">&amp;</span><span class="kw">crate</span><span class="pp">::server::</span>Database<span class="op">|</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Box</span><span class="pp">::</span>new(database<span class="op">.</span>flavor_recipes<span class="op">.</span>contains_key(<span class="op">&amp;</span><span class="pp">Flavor::</span>Chocolate))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> (new_msg<span class="op">,</span> response_rx) <span class="op">=</span> <span class="pp">Query::</span>new(f)<span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>tx<span class="op">.</span>send(new_msg)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="kw">await</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>expect(<span class="st">&quot;can not send user on channel&quot;</span>)<span class="op">;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="cf">match</span> response_rx<span class="op">.</span><span class="kw">await</span> <span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cn">Ok</span>(value) <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Here, `value` is a `Box&lt;dyn Any + Send&gt;`. You&#39;ll have to downcast it</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// to the type you know it should be (in this case, `bool`), and handle</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the case where it&#39;s not the type you expected.</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">match</span> value<span class="op">.</span><span class="pp">downcast_ref::</span><span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span>() <span class="op">{</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            <span class="cn">Some</span>(b) <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>                <span class="pp">println!</span>(<span class="st">&quot;CLIENT; received response: {}&quot;</span><span class="op">,</span> b)<span class="op">;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            <span class="cn">None</span> <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>                <span class="pp">println!</span>(<span class="st">&quot;CLIENT; received response of unexpected type&quot;</span>)<span class="op">;</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Notice the chaos and verbosity I had to go through to (1) create the closure to the query and (2) downcast the response. The first problem could be sorted out to one degree by moving the boxing operation into the query constructor, but the second will not be handled like this.</p>
+<p>I had a discussion with my senior <a href="https://github.com/TylerBloom">Tyler</a> to overcome this issue. The actual purpose of these tasks is to learn Rust and contribute to Tyler's open-source project, <a href="https://github.com/MonarchDevelopment">Monarch Development</a>. Our discussion was fruitful, let me summarize the main points and what I've learned.</p>
+<ol type="1">
+<li>Usage of <code>Any</code> indeed brings verbosity and complication. The way to figure that out goes by changing the signature of the <code>Query::new()</code> constructor and giving it generic types.</li>
+</ol>
+<p>I got his advice wrong (now I see what I did wrong clearer) and went for changing the Query struct instead. I had three approaches (all of which were wrong):</p>
+<ol type="1">
+<li>Make the <code>Query</code> struct generically typed: This resulted in a hugely verbose <code>run_client</code> and <code>run_server</code> function signature, not helping with downcasting from <code>Any</code>even a bit.</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> run_client(tx<span class="op">:</span> <span class="pp">mpsc::</span>Sender<span class="op">&lt;</span>Query<span class="op">&lt;</span><span class="dt">Result</span><span class="op">&lt;</span><span class="dt">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="bu">Any</span> <span class="op">+</span> <span class="bu">Send</span><span class="op">&gt;,</span> QuError<span class="op">&gt;&gt;&gt;</span>)</span></code></pre></div>
+<ol start="2" type="1">
+<li>Having different flavors for the <code>Query</code>, making it an enum would also not be as good as it introduced another type of complexity to the program.</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> FlavorExistsQuery<span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> FlavorCountQuery<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> FlavorWithoutMilkQuery<span class="op">;</span></span></code></pre></div>
+<p>This was when Tyler told me that Query was at the heart of the problem. <code>Query</code> should not have a generic type, and they told me to think more from the perspective of the server and move more of the logic into the closure I box. Here, we are done with the first attempt. You can find the source code <a href="https://github.com/akbulutdora/rust-learning-projects/tree/9c46a484135707c3cac8bce9308289b6f9b8eb0e/008.%20rust-icecream-db-query/icecream-db-query">here</a>. Now we come to the solution.</p>
+<h3 id="second-attempt">Second attempt</h3>
+<p>I was very surprised and excited at the solution.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> Query <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    execute_and_send<span class="op">:</span> <span class="dt">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="bu">FnOnce</span>(<span class="op">&amp;</span>Database) <span class="op">+</span> <span class="bu">Send</span><span class="op">&gt;,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">/// [Query::new] constructor needs to take a closure of type [FnOnce(&amp;Database) -&gt; T + Send + &#39;static]</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">/// it should return a receiver as well as the query object</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Query <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// used by the client</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> <span class="kw">fn</span> new<span class="op">&lt;</span>T<span class="op">,</span> F<span class="op">&gt;</span>(f<span class="op">:</span> F) <span class="op">-&gt;</span> (<span class="dt">Self</span><span class="op">,</span> <span class="pp">oneshot::</span>Receiver<span class="op">&lt;</span>T<span class="op">&gt;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">where</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        F<span class="op">:</span> <span class="bu">FnOnce</span>(<span class="op">&amp;</span>Database) <span class="op">-&gt;</span> T <span class="op">+</span> <span class="bu">Send</span> <span class="op">+</span> <span class="ot">&#39;static</span><span class="op">,</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        T<span class="op">:</span> <span class="bu">Debug</span> <span class="op">+</span> <span class="bu">Send</span> <span class="op">+</span> <span class="ot">&#39;static</span><span class="op">,</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> (tx<span class="op">,</span> rx) <span class="op">=</span> <span class="pp">oneshot::</span>channel()<span class="op">;</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> execute_and_send <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="kw">move</span> <span class="op">|</span>database<span class="op">:</span> <span class="op">&amp;</span>Database<span class="op">|</span> <span class="op">{</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> result <span class="op">=</span> f(database)<span class="op">;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> _ <span class="op">=</span> tx<span class="op">.</span>send(result)<span class="op">;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> query <span class="op">=</span> <span class="dt">Self</span> <span class="op">{</span> execute_and_send <span class="op">};</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        (query<span class="op">,</span> rx)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// used by the server</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> <span class="kw">fn</span> execute(<span class="kw">self</span><span class="op">,</span> database<span class="op">:</span> <span class="op">&amp;</span>Database) <span class="op">{</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        (<span class="kw">self</span><span class="op">.</span>execute_and_send)(database)<span class="op">;</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The query constructor takes a closure and wraps it into another closure. The latter executes the former, sends the result through the channel and returns nothing. This way, we can avoid using any generic types or trait objects in the <code>Query</code> struct. This is a very flexible and clear design!</p>
+<p>Now both the client and server codes are much simpler.</p>
+<p>Client:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> (q<span class="op">,</span> response_rx) <span class="op">=</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        <span class="pp">Query::</span>new(<span class="op">|</span>database<span class="op">:</span> <span class="op">&amp;</span>Database<span class="op">|</span> database<span class="op">.</span>flavor_recipes<span class="op">.</span>contains_key(<span class="op">&amp;</span><span class="pp">Flavor::</span>Chocolate))<span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    tx<span class="op">.</span>send(q)<span class="op">.</span><span class="kw">await</span><span class="op">.</span>expect(<span class="st">&quot;CLIENT; can not send on channel&quot;</span>)<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">match</span> response_rx<span class="op">.</span><span class="kw">await</span> <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="cn">Ok</span>(value) <span class="op">=&gt;</span> <span class="pp">println!</span>(</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;CLIENT; I asked if he has chocolate flavor! He said {}&quot;</span><span class="op">,</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>            value</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        )<span class="op">,</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="cn">Err</span>(e) <span class="op">=&gt;</span> <span class="pp">println!</span>(<span class="st">&quot;CLIENT; failed to receive response: {:?}&quot;</span><span class="op">,</span> e)<span class="op">,</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<p>Server:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">//...</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cn">Some</span>(query) <span class="op">=</span> rx<span class="op">.</span>recv() <span class="op">=&gt;</span> query<span class="op">.</span>execute(<span class="op">&amp;</span><span class="kw">mut</span> database)<span class="op">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">//...</span></span></code></pre></div>
+<p>I think this is a very elegant solution. I don't find it very intuitive yet: It feels like bending my head and looking at the world upside down, but I find the challenge of digesting this exciting.</p>
+</article>
+</main>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Passing messages between threads · Dora Akbulut</title>
+<meta name="description" content="I am trying to implement simple message-passing channels in Rust. I want to share/log my learning progress. I think it will be fun to return to it in some month">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+<nav class="crumbs"><a href="/">Dora Akbulut</a> / <a href="/posts/">Writing</a> / Learning Rust</nav>
+<article class="post"><h1>Passing messages between threads</h1><span class="date">25 May 2023 · Learning Rust</span>
+
+<p>I am trying to implement simple message-passing channels in Rust. I want to share/log my learning progress. I think it will be fun to return to it in some months/years.</p>
+<p><strong>Note:</strong> I am a complete beginner to Rust and haven't dealt with this sort of concurrency before.</p>
+<p>The task is simple: I will have two channels running on different threads or running as concurrent processes. One of them will be the client, asking for the amount of ice cream the server has. Client's actions can be triggered by command line inputs.</p>
+<p>The server will tell the client how much ice cream it has. The ice cream is 1kg to begin with, and melts by 10g each second. Bonus: each question can decrease the amount of ice cream by 20g. This will force the server to implement some kind of concurrent operation handling.</p>
+<h2 id="first-try">First try</h2>
+<p>I read <a href="https://tokio.rs/tokio/tutorial/channels">tokio docs</a>. I initialize the channel, and pass the transmitter and receiver to the tasks I spawn in the main thread (which felt intuitive). But the program immediately ends. No messages after the initial "Let's go!" are printed.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">tokio::sync::</span>mpsc<span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span><span class="pp">tokio::</span>main<span class="at">]</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Let&#39;s go!&quot;</span>)<span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create the channel</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> (tx<span class="op">,</span> rx) <span class="op">=</span> <span class="pp">mpsc::</span>channel(<span class="dv">8</span>)<span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Spawn the server task.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="pp">tokio::</span>spawn(run_server(rx))<span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Spawn the client task.</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="pp">tokio::</span>spawn(run_client(tx))<span class="op">;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> run_server(<span class="kw">mut</span> rx<span class="op">:</span> <span class="pp">mpsc::</span>Receiver<span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;</span>) <span class="op">{</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;running server&quot;</span>)<span class="op">;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="kw">let</span> <span class="cn">Some</span>(message) <span class="op">=</span> rx<span class="op">.</span>recv()<span class="op">.</span><span class="kw">await</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="pp">println!</span>(<span class="st">&quot;GOT = {}&quot;</span><span class="op">,</span> message)<span class="op">;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> run_client(tx<span class="op">:</span> <span class="pp">mpsc::</span>Sender<span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;</span>) <span class="op">{</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;sending from first handle&quot;</span>)<span class="op">;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// wait for 2 seconds</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="pp">tokio::time::</span>sleep(<span class="pp">tokio::time::Duration::</span>from_secs(<span class="dv">2</span>))<span class="op">.</span><span class="kw">await</span><span class="op">;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;woke up from sleep&quot;</span>)<span class="op">;</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    tx<span class="op">.</span>send(<span class="st">&quot;sending from first handle&quot;</span><span class="op">.</span>to_owned())</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="kw">await</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>I think the problem with this was that my program was not waiting for any of the tasks I spawned. It just started the threads, and there was nothing else to do, so it returned.</p>
+<h2 id="second-try">Second try</h2>
+<p>Run the server in the main thread and wait for it to complete. This works, but I think I am blocking the main thread with the server.</p>
+<p>Also I got the intuition that once the function owning the transmitter (client) returns, it is dropped, so the channel is closed.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">tokio::sync::</span>mpsc<span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span><span class="pp">tokio::</span>main<span class="at">]</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Let&#39;s go!&quot;</span>)<span class="op">;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> (tx<span class="op">,</span> rx) <span class="op">=</span> <span class="pp">mpsc::</span>channel(<span class="dv">8</span>)<span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Spawn the client task.</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="pp">tokio::</span>spawn(run_client(tx))<span class="op">;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the server is running, but it blocks</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    _run_server(rx)<span class="op">.</span><span class="kw">await</span><span class="op">;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">// we do not use this function in this version</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> _run_server(<span class="kw">mut</span> rx<span class="op">:</span> <span class="pp">mpsc::</span>Receiver<span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;</span>) <span class="op">{</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;running server&quot;</span>)<span class="op">;</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="kw">let</span> <span class="cn">Some</span>(msg) <span class="op">=</span> rx<span class="op">.</span>recv()<span class="op">.</span><span class="kw">await</span> <span class="op">{</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="pp">println!</span>(<span class="st">&quot;received: {:?}&quot;</span><span class="op">,</span> msg)<span class="op">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> run_client(tx<span class="op">:</span> <span class="pp">mpsc::</span>Sender<span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;</span>) <span class="op">{</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// wait for 2 seconds</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="pp">tokio::time::</span>sleep(<span class="pp">tokio::time::Duration::</span>from_secs(<span class="dv">2</span>))<span class="op">.</span><span class="kw">await</span><span class="op">;</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> msg <span class="op">=</span> <span class="dt">String</span><span class="pp">::</span>from(<span class="st">&quot;Hello ice cream guy&quot;</span>)<span class="op">;</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    tx<span class="op">.</span>send(msg)<span class="op">.</span><span class="kw">await</span><span class="op">.</span>expect(<span class="st">&quot;can not send user on channel&quot;</span>)<span class="op">;</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="third-try">Third try</h2>
+<p>I spawn a new task for the server and wait for it to complete. This works, but I don't really understand why. I don't know if I am blocking the main thread as well. I also feel like there is a cleaner way to do this. Added understanding this thoroughly to my task.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">tokio::sync::</span>mpsc<span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span><span class="pp">tokio::</span>main<span class="at">]</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Let&#39;s go!&quot;</span>)<span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> (tx<span class="op">,</span> rx) <span class="op">=</span> <span class="pp">mpsc::</span>channel(<span class="dv">8</span>)<span class="op">;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Spawn the client task.</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="pp">tokio::</span>spawn(run_client(tx))<span class="op">;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Spawn the server task in a way it doesnt block the main thread</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="pp">tokio::</span>spawn(<span class="kw">async</span> <span class="kw">move</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        run_server(rx)<span class="op">.</span><span class="kw">await</span><span class="op">;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="kw">await</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">// we do not use this function in this version</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> run_server(<span class="kw">mut</span> rx<span class="op">:</span> <span class="pp">mpsc::</span>Receiver<span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;</span>) <span class="op">{</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;running server&quot;</span>)<span class="op">;</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="kw">let</span> <span class="cn">Some</span>(msg) <span class="op">=</span> rx<span class="op">.</span>recv()<span class="op">.</span><span class="kw">await</span> <span class="op">{</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="pp">println!</span>(<span class="st">&quot;received: {:?}&quot;</span><span class="op">,</span> msg)<span class="op">;</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> run_client(tx<span class="op">:</span> <span class="pp">mpsc::</span>Sender<span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;</span>) <span class="op">{</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// wait for 2 seconds</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="pp">tokio::time::</span>sleep(<span class="pp">tokio::time::Duration::</span>from_secs(<span class="dv">2</span>))<span class="op">.</span><span class="kw">await</span><span class="op">;</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> msg <span class="op">=</span> <span class="dt">String</span><span class="pp">::</span>from(<span class="st">&quot;Hello ice cream guy&quot;</span>)<span class="op">;</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    tx<span class="op">.</span>send(msg)<span class="op">.</span><span class="kw">await</span><span class="op">.</span>expect(<span class="st">&quot;can not send user on channel&quot;</span>)<span class="op">;</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Minor update:</strong> I confirmed my hunch that when the function using the transmitter returns, the channel is closed.</p>
+<p>While trying to learn about this, I read <a href="https://doc.rust-lang.org/book/ch16-02-message-passing.html">something on the Rust book</a> that excited me:</p>
+<blockquote>
+<p>One increasingly popular approach to ensuring safe concurrency is message passing, where threads or actors communicate by sending each other messages containing data. Here’s the idea in a slogan from the Go language documentation: <em>“Do not communicate by sharing memory; instead, share memory by communicating.”</em></p>
+</blockquote>
+<p>I love Go, and seeing a wink to its docs made my day.</p>
+<h2 id="final-attempt">Final attempt</h2>
+<p>I did some improvements and kinda nailed the task. The #rustlang discord community helped me.</p>
+<p>I learned from them a couple of things:</p>
+<ol type="1">
+<li><p>I should await the tasks, so that the program will wait for them to complete. In order for them not to block the main thread, I should spawn the tasks, and await the futures returned by the tasks somewhere else. Any code that will run in the main thread should run in between.</p></li>
+<li><p>I could also use <code>join!</code>, but that's overkill because it's used for lazy futures, and tokio starts the tasks immediately. Therefore awaiting them in series is enough and idiomatic.</p></li>
+</ol>
+<p>I didn't understand when to use <code>join!</code> exactly, but I understand what's going on with my code.</p>
+<p>Here is what I did with what I've learnt:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">tokio::sync::</span><span class="op">{</span>mpsc<span class="op">,</span> oneshot<span class="op">};</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">tokio::time::</span><span class="op">{</span><span class="kw">self</span><span class="op">,</span> Duration<span class="op">,</span> Instant<span class="op">};</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span><span class="pp">tokio::</span>main<span class="at">]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Let&#39;s go!&quot;</span>)<span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> (tx<span class="op">,</span> rx) <span class="op">=</span> <span class="pp">mpsc::</span>channel(<span class="dv">8</span>)<span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> client <span class="op">=</span> <span class="pp">tokio::</span>spawn(run_client(tx))<span class="op">;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> server <span class="op">=</span> <span class="pp">tokio::</span>spawn(run_server(rx))<span class="op">;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    client<span class="op">.</span><span class="kw">await</span><span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    server<span class="op">.</span><span class="kw">await</span><span class="op">.</span>unwrap()<span class="op">;</span> <span class="co">// The main thread will not return until server returns. </span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Receiving responses:</strong></p>
+<p>I wanted the clients to be able to send requests and receive responses to those. I accidentally asked GPT to tell me how receive responses from the server so it recommended me to use oneshot channels. So I created a ClientRequest to be sent.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="at">)]</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> ClientRequest <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    message<span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    tx<span class="op">:</span> <span class="pp">oneshot::</span>Sender<span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>The server:</strong> Ice cream melts. I added this to see how data processing within the server could be a part of the whole message exchanging program. I had seen the <code>interval.tick</code> before, but Copilot completed the piece of code that ticks the timer. I will learn about how that works.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> run_server(<span class="kw">mut</span> rx<span class="op">:</span> <span class="pp">mpsc::</span>Receiver<span class="op">&lt;</span>ClientRequest<span class="op">&gt;</span>) <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;SERVER; I will give one person some ice cream!&quot;</span>)<span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> ice_cream_amount <span class="op">=</span> <span class="dv">50</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> interval <span class="op">=</span> <span class="pp">time::</span>interval_at(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="pp">Instant::</span>now() <span class="op">+</span> <span class="pp">Duration::</span>from_secs(<span class="dv">1</span>)<span class="op">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="pp">time::Duration::</span>from_secs(<span class="dv">1</span>)<span class="op">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">loop</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="pp">tokio::select!</span> <span class="op">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            _ <span class="op">=</span> interval<span class="op">.</span>tick() <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> ice_cream_amount <span class="op">&lt;</span> <span class="dv">10</span> <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                    <span class="pp">println!</span>(<span class="st">&quot;SERVER; no more ice cream!&quot;</span>)<span class="op">;</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                ice_cream_amount <span class="op">-=</span> <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>            <span class="cn">Some</span>(ClientRequest <span class="op">{</span> message<span class="op">,</span> tx <span class="op">}</span>) <span class="op">=</span> rx<span class="op">.</span>recv() <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>                <span class="pp">println!</span>(<span class="st">&quot;SERVER; received: {:?}&quot;</span><span class="op">,</span> message)<span class="op">;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>                <span class="kw">let</span> response <span class="op">=</span> <span class="pp">format!</span>(<span class="st">&quot;Here is your ice cream! I have {ice_cream_amount} left!&quot;</span>)<span class="op">;</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>                tx<span class="op">.</span>send(response)<span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span> <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>                <span class="pp">println!</span>(<span class="st">&quot;SERVER; I don&#39;t know what&#39;s happening here!&quot;</span>)<span class="op">;</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Client:</strong></p>
+<p>Every two seconds, the client will ask the server for ice cream, and report how much ice cream is left. It creates a oneshot channel and passes it to the server for an answer. It is blocked until the server responds.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">fn</span> run_client(tx<span class="op">:</span> <span class="pp">mpsc::</span>Sender<span class="op">&lt;</span>ClientRequest<span class="op">&gt;</span>) <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">loop</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="pp">tokio::time::</span>sleep(<span class="pp">tokio::time::Duration::</span>from_secs(<span class="dv">2</span>))<span class="op">.</span><span class="kw">await</span><span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> tx<span class="op">.</span>is_closed() <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>            <span class="pp">println!</span>(<span class="st">&quot;CLIENT; Ice cream guy is gone! I guess I will go home now.&quot;</span>)<span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> (response_tx<span class="op">,</span> response_rx) <span class="op">=</span> <span class="pp">oneshot::</span>channel()<span class="op">;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> new_msg <span class="op">=</span> ClientRequest <span class="op">{</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            message<span class="op">:</span> <span class="dt">String</span><span class="pp">::</span>from(<span class="st">&quot;Hello ice cream guy, give me ice cream!&quot;</span>)<span class="op">,</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>            tx<span class="op">:</span> response_tx<span class="op">,</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        tx<span class="op">.</span>send(new_msg)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span><span class="kw">await</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>expect(<span class="st">&quot;can not send user on channel&quot;</span>)<span class="op">;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> answer <span class="op">=</span> response_rx<span class="op">.</span><span class="kw">await</span><span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="pp">println!</span>(<span class="st">&quot;CLIENT; I knew you loved me!: {:?}&quot;</span><span class="op">,</span> answer)<span class="op">;</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>I might work on a more complicated implementation by adding the following:</p>
+<ul>
+<li>There are more than one clients, and each time the clients ask for ice cream, the amount of ice cream decreases.</li>
+<li>The client's are not blocked when they are waiting for a response from the server.</li>
+</ul>
+<p>Another insight I gained due to the help of a Rust developer was that the Go idiom I mentioned was more than a best practice in Rust. The compiler has strict constraints on how data can be modified by different threads.</p>
+</article>
+</main>
+</body>
+</html>

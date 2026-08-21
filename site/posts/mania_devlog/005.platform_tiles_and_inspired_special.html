@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>day five: platform tiles &amp; inspired special · Dora Akbulut</title>
+<meta name="description" content="Date: 10.06.2025">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+<nav class="crumbs"><a href="/">Dora Akbulut</a> / <a href="/posts/">Writing</a> / Mania devlog</nav>
+<article class="post"><h1>day five: platform tiles &amp; inspired special</h1><span class="date">10 Jun 2025 · Mania devlog</span>
+
+<p><strong>Date</strong>: 10.06.2025</p>
+<p><strong>Session Duration</strong>: 11:00 - 13:15</p>
+<h2 id="progress">Progress</h2>
+<ol type="1">
+<li><strong>One-way Platform Tiles</strong> I implemented one-way platform tiles for the game. Player can fall on them, but do not collide with them while jumping. They have their own texture (currently no other tile has textures, everything is just rectangles). Currently, the implementation is quite simple. I allow a small offset so that the player doesn't fall through the platform.</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode odin"><code class="sourceCode odin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> player<span class="op">.</span>vel<span class="op">.</span>y <span class="op">&gt;=</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> player<span class="op">.</span>pos<span class="op">.</span>y <span class="op">+</span> PLAYER_SIZE<span class="op">.</span>y <span class="op">&lt;=</span> tile<span class="op">.</span>pos<span class="op">.</span>y <span class="op">+</span> PASSABLE_PLATFORM_THRESHOLD <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>pos<span class="op">.</span>y <span class="op">=</span> tile<span class="op">.</span>pos<span class="op">.</span>y <span class="op">-</span> PLAYER_SIZE<span class="op">.</span>y</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>vel<span class="op">.</span>y <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    player_data<span class="op">.</span>grounded <span class="op">=</span> <span class="kw">true</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Special Action for Inspired Mood</strong> This mood represents the excitement and happiness you feel when you're in love. You feel like you have the power to change the world around you. It does two things: perform a dash and create tiles under yourself as you dash in the air. I think it allows for fun platforming mechanics.</li>
+</ol>
+<h3 id="implementation-details">Implementation details</h3>
+<p>I store the starting position (to know when the player should stop dashing and creating tiles)</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode odin"><code class="sourceCode odin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>PlayerStateDashing <span class="op">::</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    start_pos<span class="op">:</span>      Vec2<span class="op">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    dash_direction<span class="op">:</span> <span class="dt">int</span><span class="op">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Currently, all of the tiles are created at once. But it would be more beautiful if they were created one by one, and with an animation. And the tiles are destroyed if the player's mood changes or if the player dashes for a second time. Inspiration only goes so far.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode odin"><code class="sourceCode odin"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> input<span class="op">.</span>special <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="fu">player_is_dashing</span><span class="op">(</span>player_data<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>affected_by_gravity <span class="op">=</span> <span class="kw">false</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">dash_direction </span><span class="op">:=</span> player_data<span class="op">.</span>flipped <span class="op">?</span> <span class="dv">1</span> <span class="op">:</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    player_data<span class="op">.</span>state <span class="op">=</span> PlayerStateDashing <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        start_pos      <span class="op">=</span> player<span class="op">.</span>pos<span class="op">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        dash_direction <span class="op">=</span> dash_direction<span class="op">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>vel<span class="op">.</span>y <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    player_data<span class="op">.</span>num_dashes <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> player_data<span class="op">.</span>num_dashes <span class="op">==</span> <span class="dv">2</span> <span class="op">{</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        player_data<span class="op">.</span>mood <span class="op">=</span> <span class="op">.</span>None</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        player_data<span class="op">.</span>num_dashes <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">clear_inspired_tiles</span><span class="op">()</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="cf">in</span> <span class="dv">0</span> <span class="op">..&lt;</span> NUM_INSPIRED_TILES <span class="op">{</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            <span class="va">platform_pos </span><span class="op">:=</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>                player<span class="op">.</span>pos <span class="op">+</span> <span class="op">{</span><span class="dt">f32</span><span class="op">(</span>i <span class="op">*</span> TILE_SIZE <span class="op">*</span> dash_direction<span class="op">),</span> PLAYER_SIZE<span class="op">.</span>y <span class="op">+</span> <span class="dv">10</span><span class="op">}</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>            <span class="va">new_tile </span><span class="op">:=</span> Tile<span class="op">{</span>platform_pos<span class="op">,</span> <span class="op">.</span>InspiredTile<span class="op">,</span> rl<span class="op">.</span>BLUE<span class="op">}</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>            <span class="fu">append</span><span class="op">(&amp;</span>g_mem<span class="op">.</span>current_level<span class="op">.</span>tiles<span class="op">,</span> new_tile<span class="op">)</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>I am enjoying the simple and procedural programming style of Odin. I am still implementing the fundamental game mechanics. I can't wait to get done with these and organize my code to make it more maintainable.</li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>A second level that has one way platforms, and an animated enemy</li>
+<li>Level transitions</li>
+</ul>
+</article>
+</main>
+</body>
+</html>

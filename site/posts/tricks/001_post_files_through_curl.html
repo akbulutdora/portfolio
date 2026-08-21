@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POST a file with curl · Dora Akbulut</title>
+<meta name="description" content="Here is a small snippet I used today to send some files using curl. I usually use Postman to test my API, but it failed miserably to send a couple of files. Her">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+<nav class="crumbs"><a href="/">Dora Akbulut</a> / <a href="/posts/">Writing</a> / Tricks</nav>
+<article class="post"><h1>POST a file with curl</h1><span class="date">24 Aug 2023 · Tricks</span>
+<p>Here is a small snippet I used today to send some files using curl. I usually use Postman to test my API, but it failed miserably to send a couple of files. Here is what I did using curl.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>-X POST <span class="at">-H</span> <span class="st">&quot;Accept: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>-F <span class="st">&#39;attachments[]=@Chest.pdf&#39;</span> <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>-F <span class="st">&#39;attachments[]=@Core.pdf&#39;</span> <span class="dt">\</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>-F <span class="st">&#39;body=hello world&#39;</span> <span class="dt">\</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>myapi.test/api/endpoint</span></code></pre></div>
+</article>
+</main>
+</body>
+</html>

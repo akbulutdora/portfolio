@@ -5,47 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dora Akbulut</title>
 <meta name="description" content="Dora Akbulut, product engineer in London. Mobile apps, backend, and a game in Odin with no engine underneath.">
-<style>
-  :root {
-    --bg: #fbfaf7; --fg: #1b1b1b; --muted: #6b6b6b; --line: #e4e1da; --accent: #3f88c5;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #101012; --fg: #e8e6e1; --muted: #8f8d88; --line: #26262a; --accent: #6fb0e6; }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 -apple-system, system-ui, "Inter", sans-serif; }
-  main { max-width: 720px; margin: 0 auto; padding: 56px 20px 96px; }
-  h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em; }
-  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 56px 0 18px; }
-  p { margin: 0 0 12px; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .lede { color: var(--muted); margin-bottom: 14px; }
-  nav a { margin-right: 18px; font-size: 15px; }
-  .project { display: grid; grid-template-columns: 140px 1fr; gap: 18px; padding: 18px 0; border-top: 1px solid var(--line); }
-  .project:last-child { border-bottom: 1px solid var(--line); }
-  .project h3 { font-size: 17px; margin: 0 0 4px; }
-  .project .meta { font: 13px var(--mono); color: var(--muted); }
-  .project p { margin: 0 0 8px; }
-  .links a { font-size: 14px; margin-right: 12px; }
-  .thumb { width: 140px; height: 96px; background: var(--line); border-radius: 6px; object-fit: cover; display: block; }
-  .project.wide { grid-template-columns: 1fr; }
-  .project .toy { margin: 10px 0 12px; }
-  @media (max-width: 560px) { .project { grid-template-columns: 1fr; } .thumb { width: 100%; height: 160px; } }
-  .toy { position: relative; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #101012; aspect-ratio: 16 / 9; }
-  .toy canvas { display: block; width: 100%; height: 100%; outline: none; }
-  .toy .cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #cfcfcf; background: #101012; }
-  .toy button { font: inherit; padding: 10px 18px; border-radius: 6px; border: 1px solid #444; background: #1c1c20; color: #eee; cursor: pointer; }
-  .toy button:hover { background: #26262c; }
-  .toy .fs { position: absolute; right: 8px; bottom: 8px; padding: 6px 10px; font-size: 13px; opacity: 0; transition: opacity .15s; }
-  .toy:hover .fs, .toy:focus-within .fs { opacity: 1; }
-  .toy:fullscreen { border: 0; border-radius: 0; aspect-ratio: auto; width: 100vw; height: 100vh; }
-  .toy small { color: #8a8a8a; font: 13px var(--mono); }
-  .writing li { margin-bottom: 8px; }
-  ul { padding-left: 20px; }
-  footer { margin-top: 64px; color: var(--muted); font-size: 14px; }
-</style>
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <main>
@@ -55,15 +15,14 @@
     <nav>
       <a href="#projects">Projects</a>
       <a href="#play">Play</a>
-      <a href="#writing">Writing</a>
+      <a href="/posts/">Writing</a>
       <a href="https://github.com/akbulutdora">GitHub</a>
-      <a href="https://akbulutdora.github.io">Blog</a>
       <a href="mailto:akbulutdora@gmail.com">Email</a>
     </nav>
   </header>
 
   <h2 id="play">Play</h2>
-  <p>This canvas is Odin and raylib compiled to WebAssembly. There is no engine underneath it. Every ball moves with the frame delta, so it runs the same at 30 Hz and 144 Hz. <a href="https://github.com/akbulutdora">Source</a>.</p>
+  <p>This canvas is Odin and raylib compiled to WebAssembly. There is no engine underneath it. Every ball moves with the frame delta, so it runs the same at 30 Hz and 144 Hz. <a href="https://github.com/akbulutdora/portfolio/tree/main/toy">Source</a>.</p>
   <div class="toy" data-wasm="toy" data-factory="createToy">
     <canvas oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
     <div class="cover"><small>loading</small></div>
@@ -81,7 +40,7 @@
         <div class="cover"><small>loading · A/D move, space jumps, M for sound</small></div>
       </div>
       <div class="links">
-        <a href="https://akbulutdora.github.io/posts/mania_devlog/001_day_one.html">Devlog, 5 parts</a>
+        <a href="/posts/mania_devlog/001_day_one.html">Devlog, 5 parts</a>
       </div>
     </div>
   </article>
@@ -131,10 +90,14 @@
 
   <h2 id="writing">Writing</h2>
   <ul class="writing">
-    <li><a href="https://akbulutdora.github.io/posts/mania_devlog/001_day_one.html">Mania devlog</a>: entity systems, frame-rate independence, platform tiles. 5 parts.</li>
-    <li><a href="https://akbulutdora.github.io">Does the shift from behavioral AI to deep learning constitute a Kuhnian paradigm shift?</a> Term paper.</li>
-    <li><a href="https://akbulutdora.github.io">Open source software and the Triple Helix model of science.</a> Term paper.</li>
+    <li><strong>Mania devlog</strong>: <a href="/posts/mania_devlog/001_day_one.html">day one: dev environment, camera zoom, frame-rate independence, mood states</a> <span class="meta">and 4 more</span></li>
+    <li><strong>Philosophy</strong>: <a href="/posts/philosophy/001_foss_thm.html">Open Source Software and the Triple Helix Model of Science</a> <span class="meta">and 1 more</span></li>
+    <li><strong>Learning Rust</strong>: <a href="/posts/rust/001_mpbt.html">Passing messages between threads</a> <span class="meta">and 2 more</span></li>
+    <li><strong>Flutter</strong>: <a href="/posts/flutter/001_input_toolbar.html">Implementing an Input Toolbar in Flutter</a></li>
+    <li><strong>Developer</strong>: <a href="/posts/developer/gq.html">Job application questions I liked</a> <span class="meta">and 2 more</span></li>
+    <li><strong>Tricks</strong>: <a href="/posts/tricks/001_post_files_through_curl.html">POST a file with curl</a> <span class="meta">and 1 more</span></li>
   </ul>
+  <p><a href="/posts/">All writing</a></p>
 
   <footer>
     <a href="mailto:akbulutdora@gmail.com">akbulutdora@gmail.com</a> · <a href="https://github.com/akbulutdora">github.com/akbulutdora</a>

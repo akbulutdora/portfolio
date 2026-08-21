@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>day four: letter ui, scaling the ui, displaying collected letters and disabling input · Dora Akbulut</title>
+<meta name="description" content="Date: 06.06.2025">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+<nav class="crumbs"><a href="/">Dora Akbulut</a> / <a href="/posts/">Writing</a> / Mania devlog</nav>
+<article class="post"><h1>day four: letter ui, scaling the ui, displaying collected letters and disabling input</h1><span class="date">6 Jun 2025 · Mania devlog</span>
+
+<p><strong>Date</strong>: 06.06.2025</p>
+<p><strong>Session Duration</strong>: 16:00 - 18:00</p>
+<h2 id="progress">Progress</h2>
+<ol type="1">
+<li><strong>Letter UI</strong> I list collected letters as UI elements on the top left of my screen. Later on, I will use their indices for player to re-read them. I also made a simple UI for the letter that displays the content and frames it with the color of the mood. I wrote very basic code, so there is a lot of duplication for the paddings.</li>
+</ol>
+<p>When the player collects a letter, it is set as the active letter. For this, I added a new state to the player: PlayerStateReadingLetter. While in this state, the ui draws the letter</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode odin"><code class="sourceCode odin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>PlayerState <span class="op">::</span> <span class="kw">union</span> <span class="pp">#no_nil</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    PlayerStateNormal<span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    PlayerStateJumping<span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    PlayerStateSmashing<span class="op">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    PlayerStateDashing<span class="op">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    PlayerStateReadingLetter<span class="op">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>PlayerStateReadingLetter <span class="op">::</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    active_letter<span class="op">:</span> Entity_Handle<span class="op">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Disabling Input</strong> I disabled all input except for Enter while reading letter. I did this very brutally for now</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="sourceCode odin"><code class="sourceCode odin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">player </span><span class="op">:=</span> hm<span class="op">.</span><span class="fu">get</span><span class="op">(&amp;</span>g_mem<span class="op">.</span>entities<span class="op">,</span> g_mem<span class="op">.</span>player<span class="op">)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">player_data, _ </span><span class="op">:=</span> player<span class="op">.</span>data<span class="op">.(</span>Player_Data<span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> ok <span class="op">:=</span> player_data<span class="op">.</span>state<span class="op">.(</span>PlayerStateReadingLetter<span class="op">);</span> ok <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        input <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>            enter <span class="op">=</span> input<span class="op">.</span>enter<span class="op">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div>
+<ol start="3" type="1">
+<li><strong>Scaling the UI</strong> I had to do quite a bit of UI programming. The UI had to be scaled for the user's screen size, and things got messy in the beginning. But I figured it out.</li>
+</ol>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>I really don't think this code is going to scale. Getting the player entity takes too much effort every time because I am just using the bare-bones handle map functions. I should write a function to get it easily.</li>
+<li>I might need a simple system for layouts, paddings, margins, and alignment.</li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Mood-based abilities (Still need to implement Inspired and Sad mood abilities. I think I'll do Sad the latest because it requires me to implement disabling collision temporarily)</li>
+<li>One way platforms</li>
+<li>A second level that has one way platforms, and an animated enemy</li>
+<li>Level transitions</li>
+</ul>
+</article>
+</main>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>day three: handle-based entity system, reading game data from json · Dora Akbulut</title>
+<meta name="description" content="Date: 03.06.2025">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+<nav class="crumbs"><a href="/">Dora Akbulut</a> / <a href="/posts/">Writing</a> / Mania devlog</nav>
+<article class="post"><h1>day three: handle-based entity system, reading game data from json</h1><span class="date">3 Jun 2025 · Mania devlog</span>
+
+<p><strong>Date</strong>: 03.06.2025</p>
+<p><strong>Session Duration</strong>: 11:00 - 17:00</p>
+<h2 id="progress">Progress</h2>
+<ol type="1">
+<li><strong>Handle-Based Entity System</strong> I implemented Karl Zylinski's <a href="https://www.youtube.com/watch?v=MzR1us2nZPY">Static Handle Maps</a> for my entity system. I migrated my Player to be an Entity. The implementation isn't complete. I still need to migrate the animation, but that's another day's work.</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode odin"><code class="sourceCode odin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Entity_Type <span class="op">::</span> <span class="kw">enum</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    None<span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Player<span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Letter<span class="op">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>Entity_Type_Data <span class="op">::</span> <span class="kw">union</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    Player_Data<span class="op">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    Letter_Data<span class="op">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>Letter_Data <span class="op">::</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    id<span class="op">:</span>       <span class="dt">string</span><span class="op">,</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    response<span class="op">:</span> <span class="dt">string</span><span class="op">,</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    content<span class="op">:</span>  <span class="dt">string</span><span class="op">,</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    mood<span class="op">:</span>     PlayerMood<span class="op">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>TextureName <span class="op">::</span> <span class="kw">enum</span> <span class="op">{</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    Player<span class="op">,</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    Letter<span class="op">,</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>Player_Data <span class="op">::</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    state<span class="op">:</span>         PlayerState<span class="op">,</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    grounded<span class="op">:</span>      <span class="dt">bool</span><span class="op">,</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    flipped<span class="op">:</span>       <span class="dt">bool</span><span class="op">,</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    is_running<span class="op">:</span>    <span class="dt">bool</span><span class="op">,</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    mood<span class="op">:</span>          PlayerMood<span class="op">,</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    idle_anim<span class="op">:</span>     AnimatedSprite<span class="op">,</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    run_anim<span class="op">:</span>      AnimatedSprite<span class="op">,</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    jump_anim<span class="op">:</span>     AnimatedSprite<span class="op">,</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    anim_instance<span class="op">:</span> AnimationInstance<span class="op">,</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>Entity <span class="op">::</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    handle<span class="op">:</span>   Entity_Handle<span class="op">,</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    type<span class="op">:</span>     Entity_Type<span class="op">,</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    pos<span class="op">:</span>      Vec2<span class="op">,</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    vel<span class="op">:</span>      Vec2<span class="op">,</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    size<span class="op">:</span>     Vec2<span class="op">,</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    color<span class="op">:</span>    rl<span class="op">.</span>Color<span class="op">,</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    tex<span class="op">:</span>      TextureName<span class="op">,</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    <span class="co">// anim: Animation,</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    collider<span class="op">:</span> Rect<span class="op">,</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    disabled<span class="op">:</span> <span class="dt">bool</span><span class="op">,</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    data<span class="op">:</span>     Entity_Type_Data<span class="op">,</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Reading Game Data From Json</strong> I needed the letters to contain data, and my current ASCII-based level data can't support this. Therefore I decided to store these as JSON.</li>
+</ol>
+<p>Here is how I store the data for now:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;level_id&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;letters&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;1_1&quot;</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;pos&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">4</span><span class="ot">,</span> <span class="dv">10</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;A&quot;</span><span class="fu">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;mood&quot;</span><span class="fu">:</span> <span class="st">&quot;angry&quot;</span><span class="fu">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;response&quot;</span><span class="fu">:</span> <span class="st">&quot;I am angry!&quot;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;1_2&quot;</span><span class="fu">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;pos&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">5</span><span class="ot">,</span> <span class="dv">13</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;B&quot;</span><span class="fu">,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;mood&quot;</span><span class="fu">:</span> <span class="st">&quot;inspired&quot;</span><span class="fu">,</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;response&quot;</span><span class="fu">:</span> <span class="st">&quot;I am happy!&quot;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>      <span class="ot">]</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>And here is how I load it.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode odin"><code class="sourceCode odin"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>LEVEL_COUNT <span class="op">::</span> <span class="dv">32</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>LETTER_COUNT <span class="op">::</span> <span class="dv">8</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">@</span><span class="op">(</span><span class="at">private</span> <span class="op">=</span> <span class="st">&quot;file&quot;</span><span class="op">)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>Letter_Data <span class="op">::</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    id<span class="op">:</span>       <span class="dt">string</span><span class="op">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    pos<span class="op">:</span>      Vec2<span class="op">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    content<span class="op">:</span>  <span class="dt">string</span><span class="op">,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    mood<span class="op">:</span>     <span class="dt">string</span><span class="op">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    response<span class="op">:</span> <span class="dt">string</span><span class="op">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="at">@</span><span class="op">(</span><span class="at">private</span> <span class="op">=</span> <span class="st">&quot;file&quot;</span><span class="op">)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>Level_Data <span class="op">::</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    level_id<span class="op">:</span> <span class="dt">int</span><span class="op">,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    letters<span class="op">:</span>  <span class="op">[</span>LETTER_COUNT<span class="op">]</span>Letter_Data<span class="op">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="at">@</span><span class="op">(</span><span class="at">private</span> <span class="op">=</span> <span class="st">&quot;file&quot;</span><span class="op">)</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>Level_Letter_Data <span class="op">::</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    data<span class="op">:</span> <span class="op">[</span>LEVEL_COUNT<span class="op">]</span>Level_Data<span class="op">,</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="fu">parse_letter_data_json </span><span class="op">::</span><span class="fu"> </span><span class="kw">proc</span><span class="op">()</span> <span class="op">-&gt;</span> Level_Letter_Data <span class="op">{</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="va">abs_path, _ </span><span class="op">:=</span> path<span class="op">.</span><span class="fu">abs</span><span class="op">(</span><span class="st">&quot;./&quot;</span><span class="op">,</span> <span class="kw">context</span><span class="op">.</span>temp_allocator<span class="op">)</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="va">file_name </span><span class="op">:=</span> fmt<span class="op">.</span><span class="fu">tprintf</span><span class="op">(</span><span class="st">&quot;%v/assets/levels/letter_data.json&quot;</span><span class="op">,</span> abs_path<span class="op">)</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="va">data, ok </span><span class="op">:=</span> os<span class="op">.</span><span class="fu">read_entire_file_from_filename</span><span class="op">(</span>file_name<span class="op">)</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span>ok <span class="op">{</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        <span class="fu">panic</span><span class="op">(</span><span class="st">&quot;Failed to load the letter data file!&quot;</span><span class="op">)</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">defer</span> <span class="fu">delete</span><span class="op">(</span>data<span class="op">)</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    level_letter_data<span class="op">:</span> Level_Letter_Data</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="va">unmarshal_err </span><span class="op">:=</span> json<span class="op">.</span><span class="fu">unmarshal</span><span class="op">(</span>data<span class="op">,</span> <span class="op">&amp;</span>level_letter_data<span class="op">,</span> allocator <span class="op">=</span> <span class="kw">context</span><span class="op">.</span>temp_allocator<span class="op">)</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> unmarshal_err <span class="op">!=</span> <span class="kw">nil</span> <span class="op">{</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        <span class="fu">panic</span><span class="op">(</span><span class="st">&quot;Failed to unmarshal letter json file!&quot;</span><span class="op">)</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> level_letter_data</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>The structure of all this could change. I am still learning and figuring out how to do things.</li>
+<li>I am slightly aware that I could optimize game data loading by storing them as binary, since parsing JSON is slow. Maybe I do that as a pre-compilation step. But I think my game is too small for this.</li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Mood-based abilities (Still need to implement Inspired and Sad mood abilities. I think I'll do Sad the latest because it requires me to implement disabling collision temporarily)</li>
+<li>Collecting letters, displaying letter content</li>
+<li>One way platforms</li>
+<li>A second level that has one way platforms, and an animated enemy</li>
+<li>Level transitions</li>
+</ul>
+</article>
+</main>
+</body>
+</html>
