@@ -14,19 +14,11 @@
     <p class="lede">Product engineer in London. I build the whole thing: the data model, the API, the app, and most of the time the design. I care about performance and design because the user feels both.</p>
     <nav>
       <a href="#projects">Projects</a>
-      <a href="#play">Play</a>
       <a href="/posts/">Writing</a>
       <a href="https://github.com/akbulutdora">GitHub</a>
       <a href="mailto:akbulutdora@gmail.com">Email</a>
     </nav>
   </header>
-
-  <h2 id="play">Play</h2>
-  <p>This canvas is Odin and raylib compiled to WebAssembly. There is no engine underneath it. Every ball moves with the frame delta, so it runs the same at 30 Hz and 144 Hz. <a href="https://github.com/akbulutdora/portfolio/tree/main/toy">Source</a>.</p>
-  <div class="toy" data-wasm="toy" data-factory="createToy">
-    <canvas oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
-    <div class="cover"><small>loading</small></div>
-  </div>
 
   <h2 id="projects">Projects</h2>
 
@@ -122,7 +114,7 @@
 
     const assets = await (await fetch('assets.json', { cache: 'no-cache' })).json();
     const files = assets[name];
-    odinReady = odinReady || loadScript('toy/odin.js');
+    odinReady = odinReady || loadScript('mania/odin.js');
     await odinReady;
     await loadScript(files.js);
 

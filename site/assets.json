@@ -1,8 +1,4 @@
 {
-  "toy": {
-    "js": "toy/toy.7687b903c7.js",
-    "wasm": "toy/toy.7687b903c7.wasm"
-  },
   "mania": {
     "js": "mania/mania.a0f67c4829.js",
     "wasm": "mania/mania.a0f67c4829.wasm"
