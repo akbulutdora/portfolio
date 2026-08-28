@@ -1,18 +1,21 @@
-/* The booklet on paper. Same two colours, inverted: cream page, dark ink. */
+/* The booklet on paper: saddle stitch.
+   One A4 sheet, landscape, double sided, holds 4 A5 pages. Fold each sheet in
+   half, nest them in order, staple the fold. Nothing is cut.
+   Same two colours, inverted: cream page, dark ink. */
 
-@page { size: A5; margin: 14mm; }
+@page { size: A4 landscape; margin: 0; }
 
 body {
   background: #f5e8d1;
   color: #0f1b26;
   display: block;
-  font-size: 11pt;
-  line-height: 1.55;
+  margin: 0;
 }
 
-/* only the booklet prints */
 .card,
-.booklet__bar { display: none !important; }
+.booklet__bar,
+.booklet__how,
+.pages { display: none !important; }
 
 .booklet {
   position: static;
@@ -22,25 +25,43 @@ body {
 }
 .booklet[hidden] { display: none !important; }
 
-.pages { display: block; padding: 0; gap: 0; }
+.sheets { display: block !important; }
 
-.page {
-  width: auto;
+.sheet {
+  width: 297mm;
+  height: 210mm;
+  display: flex;
+  break-after: page;
+  break-inside: avoid;
+  overflow: hidden;
+}
+.sheet:last-child { break-after: auto; }
+
+/* some drivers flip the back the other way; the checkbox turns this on */
+body.flip-long .sheet--back { transform: rotate(180deg); }
+
+.half {
+  width: 148.5mm;
+  height: 210mm;
+  overflow: hidden;
+}
+.half--left  { padding: 14mm 16mm 14mm 12mm; }   /* right edge is the fold */
+.half--right { padding: 14mm 12mm 14mm 16mm; }   /* left edge is the fold  */
+
+/* the cloned page fills its half; the half owns the margins */
+.half .page {
+  position: static;
+  width: 100%;
+  height: 100%;
+  transform: none;
   padding: 0;
   background: none;
   color: inherit;
-  break-after: page;
-  break-inside: avoid;
+  outline: none;
 }
-.page:last-child { break-after: auto; }
-
-.page--cover { padding-block: 0; }
-.page__title { font-size: 20pt; }
 
 .page__art {
-  width: 70mm;
-  max-width: 70mm;
-  margin: 0 auto 8mm;
+  width: 55mm;
   image-rendering: pixelated;
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
@@ -48,4 +69,5 @@ body {
 
 .page__num   { opacity: 1; color: #6b6257; }
 .page__probe { opacity: 1; color: #3a4650; }
+.page__sub   { opacity: 1; color: #6b6257; }
 .page__choice { opacity: 1; }

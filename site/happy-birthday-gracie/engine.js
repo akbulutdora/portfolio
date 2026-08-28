@@ -14,7 +14,7 @@
     card: $("card"), art: $("art"), img: $("art-img"),
     body: document.querySelector(".body"),
     text: $("text"), choices: $("choices"),
-    booklet: $("booklet"), pages: $("pages"),
+    booklet: $("booklet"), pages: $("pages"), sheets: $("sheets"),
   };
 
   function val(x) { return typeof x === "function" ? x(state) : x; }
@@ -129,64 +129,122 @@
   }
 
   /* ---- booklet ----------------------------------------------------- */
+  /* Saddle stitch. Every A4 sheet, printed landscape and double sided, holds
+     four A5 pages: two per side. Fold the sheet down the middle, nest the
+     sheets in order, staple the fold. No cutting.
+     So the pages must be imposed: page 1 shares a sheet side with the last
+     page, page 2 with the second last, and so on inward. */
 
-  function page(cls) {
-    var d = document.createElement("div");
-    d.className = "page" + (cls ? " " + cls : "");
-    return d;
+  function div(cls) { var d = document.createElement("div"); d.className = cls; return d; }
+
+  // returns [[left, right], ...], one entry per printed side, 1-based,
+  // 0 means a blank half. Reading order is padded to a multiple of 4.
+  function impose(count) {
+    var total = Math.ceil(count / 4) * 4;
+    var sides = [];
+    for (var i = 0; i < total / 4; i++) {
+      sides.push([total - 2 * i, 1 + 2 * i]);          // front of sheet i
+      sides.push([2 + 2 * i, total - 1 - 2 * i]);      // back of sheet i
+    }
+    return sides.map(function (pair) {
+      return pair.map(function (n) { return n > count ? 0 : n; });
+    });
   }
 
-  function buildBooklet() {
-    el.pages.innerHTML = "";
-
-    var cover = page("page--cover");
+  function coverLeaf() {
+    var p = div("page page--cover");
     var h = document.createElement("h1");
     h.className = "page__title";
     h.textContent = document.title;
-    cover.appendChild(h);
+    p.appendChild(h);
     var sub = document.createElement("p");
     sub.className = "page__sub";
     sub.textContent = trail.length + " scenes";
-    cover.appendChild(sub);
-    el.pages.appendChild(cover);
+    p.appendChild(sub);
+    return p;
+  }
 
-    trail.forEach(function (t, i) {
-      var p = page();
+  function sceneLeaf(t, i) {
+    var p = div("page");
 
-      var n = document.createElement("div");
-      n.className = "page__num";
-      n.textContent = String(i + 1);
-      p.appendChild(n);
+    var n = div("page__num");
+    n.textContent = String(i + 1);
+    p.appendChild(n);
 
-      if (t.art) {
-        var im = document.createElement("img");
-        im.className = "page__art";
-        im.alt = "";
-        im.addEventListener("error", function () { im.remove(); });
-        im.src = t.art;
-        p.appendChild(im);
-      }
+    var inner = div("page__inner");
 
-      var body = document.createElement("div");
-      body.className = "page__text";
-      paragraphs(body, t.text);
-      p.appendChild(body);
+    if (t.art) {
+      var im = document.createElement("img");
+      im.className = "page__art";
+      im.alt = "";
+      im.addEventListener("error", function () { im.remove(); });
+      im.src = t.art;
+      inner.appendChild(im);
+    }
 
-      t.probes.forEach(function (label) {
-        var pr = document.createElement("p");
-        pr.className = "page__probe";
-        pr.textContent = label;
-        p.appendChild(pr);
+    var body = div("page__text");
+    paragraphs(body, t.text);
+    inner.appendChild(body);
+
+    t.probes.forEach(function (label) {
+      var pr = document.createElement("p");
+      pr.className = "page__probe";
+      pr.textContent = label;
+      inner.appendChild(pr);
+    });
+
+    if (t.choice) {
+      var ch = document.createElement("p");
+      ch.className = "page__choice";
+      ch.textContent = t.choice;
+      inner.appendChild(ch);
+    }
+
+    p.appendChild(inner);
+    return p;
+  }
+
+  function buildBooklet() {
+    var leaves = [coverLeaf()];
+    trail.forEach(function (t, i) { leaves.push(sceneLeaf(t, i)); });
+
+    // screen: one A5 page at a time, at true proportions
+    el.pages.innerHTML = "";
+    leaves.forEach(function (leaf) {
+      var wrap = div("page-wrap");
+      wrap.appendChild(leaf);
+      el.pages.appendChild(wrap);
+    });
+
+    // print: imposed A4 sheets
+    el.sheets.innerHTML = "";
+    impose(leaves.length).forEach(function (pair, side) {
+      var sheet = div("sheet" + (side % 2 ? " sheet--back" : " sheet--front"));
+      pair.forEach(function (n, k) {
+        var half = div("half half--" + (k === 0 ? "left" : "right"));
+        if (n) half.appendChild(leaves[n - 1].cloneNode(true));
+        sheet.appendChild(half);
       });
+      el.sheets.appendChild(sheet);
+    });
 
-      if (t.choice) {
-        var ch = document.createElement("p");
-        ch.className = "page__choice";
-        ch.textContent = t.choice;
-        p.appendChild(ch);
-      }
+    fitPreview();
+    flagOverflow();
+  }
 
-      el.pages.appendChild(p);
+  // scale the true-size A5 preview down to the column width
+  function fitPreview() {
+    var wrap = el.pages.querySelector(".page-wrap");
+    if (!wrap) return;
+    var A5_W_PX = 148.5 * (96 / 25.4);
+    el.pages.style.setProperty("--preview-scale", wrap.clientWidth / A5_W_PX);
+  }
+
+  // warn while writing: a scene that will not fit on one A5 page
+  function flagOverflow() {
+    el.pages.querySelectorAll(".page").forEach(function (p) {
+      var inner = p.querySelector(".page__inner") || p;
+      p.classList.toggle("page--overflow", inner.scrollHeight > inner.clientHeight + 1);
     });
   }
 
@@ -196,6 +254,7 @@
     document.body.classList.add("reading");
     el.booklet.scrollTop = 0;
     window.scrollTo(0, 0);
+    requestAnimationFrame(function () { fitPreview(); flagOverflow(); });
   }
 
   function closeBooklet() {
@@ -206,6 +265,10 @@
   /* ---- boot -------------------------------------------------------- */
 
   $("bk-print").addEventListener("click", function () { window.print(); });
+  $("bk-flip").addEventListener("change", function () {
+    document.body.classList.toggle("flip-long", this.checked);
+  });
+  window.addEventListener("resize", function () { fitPreview(); flagOverflow(); });
   $("bk-back").addEventListener("click", closeBooklet);
   $("bk-restart").addEventListener("click", restart);
 

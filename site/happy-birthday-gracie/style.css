@@ -117,6 +117,8 @@ body {
 .choice--bind { border-style: dashed; }
 
 /* ---- booklet, on screen --------------------------------------------- */
+/* The preview shows a true A5 page, scaled down to the column. What you see
+   is the size it prints, so an overflowing scene is visible while you write. */
 body.reading .card { display: none; }
 
 .booklet { position: fixed; inset: 0; z-index: 10; overflow-y: auto; background: var(--bg); }
@@ -134,36 +136,68 @@ body.reading .card { display: none; }
 }
 .booklet__bar button:hover { background: var(--fg); color: var(--bg); }
 
+.booklet__how {
+  padding: 14px 16px;
+  color: var(--dim); font-size: 13px; line-height: 1.5;
+  border-bottom: 1px solid var(--rule);
+}
+.booklet__how b { color: var(--fg); font-weight: 600; }
+.booklet__how label { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+
+.sheets { display: none; }          /* print only */
+
 .pages {
+  --preview-scale: 1;
   display: flex; flex-direction: column; align-items: center; gap: 18px;
   padding: 18px 16px calc(24px + env(safe-area-inset-bottom));
 }
-.page {
+.page-wrap {
+  position: relative;
   width: min(420px, 100%);
-  padding: 26px 22px;
+  aspect-ratio: 148.5 / 210;        /* A5 */
+  overflow: hidden;
+  background: var(--fg);
+}
+.page-wrap:has(.page--overflow) { outline: 2px solid var(--c-hair); }
+.page-wrap:has(.page--overflow)::after {
+  content: "TOO LONG FOR ONE PAGE";
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 6px 8px;
+  background: var(--c-hair); color: var(--fg);
+  font-size: 11px; letter-spacing: 0.08em; text-align: center;
+}
+.page {
+  position: absolute; top: 0; left: 0;
+  width: 148.5mm; height: 210mm;
+  transform: scale(var(--preview-scale));
+  transform-origin: top left;
+  display: flex; flex-direction: column;
+  padding: 12mm;
   background: var(--fg);    /* paper */
   color: var(--bg);         /* ink   */
+  font-size: 10.5pt;
 }
-.page--cover { text-align: center; padding-block: 56px; }
-.page__title { font-size: 26px; font-weight: 700; line-height: 1.2; }
-.page__sub   { margin-top: 8px; font-size: 13px; opacity: 0.6; }
-.page__num   { font-size: 11px; letter-spacing: 0.18em; opacity: 0.5; margin-bottom: 14px; }
+.page__inner { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.page--cover { justify-content: center; text-align: center; }
+.page__title { font-size: 22pt; font-weight: 700; line-height: 1.2; }
+.page__sub   { margin-top: 8px; font-size: 9pt; opacity: 0.6; }
+.page__num   { font-size: 8pt; letter-spacing: 0.18em; opacity: 0.5; margin-bottom: 6mm; }
 .page__art {
-  display: block; width: 100%; max-width: 288px; height: auto;
-  margin: 0 auto 18px; image-rendering: pixelated;
+  display: block; width: 55mm; height: auto;
+  margin: 0 auto 6mm; image-rendering: pixelated;
 }
-.page__text > * + * { margin-top: 12px; }
+.page__text > * + * { margin-top: 10px; }
 .page__probe {
-  margin-top: 12px; padding-left: 12px;
+  margin-top: 10px; padding-left: 10px;
   border-left: 2px solid currentColor;
-  font-style: italic; font-size: 15px; opacity: 0.75;
+  font-style: italic; opacity: 0.75;
 }
 .page__choice {
-  margin-top: 16px; padding-top: 12px;
+  margin-top: auto; padding-top: 10px;
   border-top: 1px solid currentColor;
-  font-size: 14px; letter-spacing: 0.04em;
+  font-size: 9pt; letter-spacing: 0.04em;
 }
-.page__choice::before { content: "→ "; }
+.page__choice::before { content: "\2192  "; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
