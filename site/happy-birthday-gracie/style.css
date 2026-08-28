@@ -158,13 +158,23 @@ body.reading .card { display: none; }
   display: flex; flex-direction: column; align-items: center; gap: 18px;
   padding: 18px 16px calc(24px + env(safe-area-inset-bottom));
 }
+/* two pages to a row, touching at the spine, the way the sheet folds */
+.spread {
+  display: flex;
+  width: min(560px, 100%);
+}
+.spread--single { justify-content: flex-start; }
+.spread--single .page-wrap { flex: 0 0 50%; }
+
 .page-wrap {
   position: relative;
-  width: min(420px, 100%);
+  flex: 1 1 0;
+  min-width: 0;
   aspect-ratio: 148.5 / 210;        /* A5 */
   overflow: hidden;
   background: var(--fg);
 }
+.page-wrap + .page-wrap { border-left: 1px solid rgba(15, 27, 38, 0.18); }
 .page-wrap:has(.page--overflow) { outline: 2px solid var(--c-hair); }
 .page-wrap:has(.page--overflow)::after {
   content: "TOO LONG FOR ONE PAGE";
@@ -194,11 +204,6 @@ body.reading .card { display: none; }
   margin: 0 auto 6mm; image-rendering: pixelated;
 }
 .page__text > * + * { margin-top: 10px; }
-.page__probe {
-  margin-top: 10px; padding-left: 10px;
-  border-left: 2px solid currentColor;
-  font-style: italic; opacity: 0.75;
-}
 .page__choice {
   margin-top: auto; padding-top: 10px;
   border-top: 1px solid currentColor;

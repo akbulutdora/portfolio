@@ -223,13 +223,6 @@
     paragraphs(body, t.text);
     inner.appendChild(body);
 
-    t.probes.forEach(function (label) {
-      var pr = document.createElement("p");
-      pr.className = "page__probe";
-      pr.textContent = label;
-      inner.appendChild(pr);
-    });
-
     if (t.choice) {
       var ch = document.createElement("p");
       ch.className = "page__choice";
@@ -245,12 +238,18 @@
     var leaves = [coverLeaf()];
     trail.forEach(function (t, i) { leaves.push(sceneLeaf(t, i)); });
 
-    // screen: one A5 page at a time, at true proportions
+    // screen: the cover on its own, then two pages to a row, as it folds
     el.pages.innerHTML = "";
-    leaves.forEach(function (leaf) {
-      var wrap = div("page-wrap");
-      wrap.appendChild(leaf);
-      el.pages.appendChild(wrap);
+    var groups = [[leaves[0]]];
+    for (var i = 1; i < leaves.length; i += 2) groups.push(leaves.slice(i, i + 2));
+    groups.forEach(function (group) {
+      var sp = div("spread" + (group.length === 1 ? " spread--single" : ""));
+      group.forEach(function (leaf) {
+        var wrap = div("page-wrap");
+        wrap.appendChild(leaf);
+        sp.appendChild(wrap);
+      });
+      el.pages.appendChild(sp);
     });
 
     // print: imposed A4 sheets

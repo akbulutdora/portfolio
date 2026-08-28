@@ -32,14 +32,14 @@ const UI = {
   //   choices: [{ label: UI.next, to: "story2scene1" }]
   next: "END. go to next story.",
   // printed on the booklet cover; blank prints nothing
-  coverTitle: "",
+  coverTitle: "gracie's birthday adventures with dory!",
 };
 
 const START = "scene1";
 
 const STORY = {
   scene1: {
-    art: "art/scene1.gif",
+    art: "art/scene-1-kitchen.png",
     text:
       "they are in the kitchen. gracie is baking the cake. dory is sitting on the kitchen counter, hanging out. they are chatting with joy.\n\n" +
       "gracie: did you know that dogs bark??\n\n" +
@@ -51,12 +51,15 @@ const STORY = {
   },
 
   scene2: {
-    art: "art/scene2.gif",
+    art: "art/scene-2-cake.png",
     text: (s) =>
       "gracie has taken the cake out of the oven. cake is in between them.\n\n" +
       'gracie says: "raging success"!\n\n' +
       'dory says: "it looks amazing! i\'m gonna get so fat!!!"' +
-      (s.kissed ? "\n\ndory gives gracie a kiss" : ""),
+      (s.kissed
+        ? '\n\ngracie says: "hehehe you\'ll still be so handsome"' +
+          "\n\ndory gives gracie a kiss"
+        : ""),
     choices: [
       {
         label: "hehehe you'll still be so handsome",
@@ -70,7 +73,7 @@ const STORY = {
   },
 
   scene3: {
-    art: "art/scene3.gif",
+    art: "art/scene-3-after.png",
     text:
       "their eyes are red from having smoked a joint and dory is fat.\n\n" +
       'gracie: "that was so much fun!"\n\n' +
