@@ -36,6 +36,7 @@
    scale keeps the pixel grid whole and puts the buttons back on screen. */
 @media (max-height: 600px) {
   :root { --art-scale: 1; }
+  .card { gap: 12px; padding-top: 12px; }
 }
 
 /* ---- reset --------------------------------------------------------- */
@@ -88,7 +89,9 @@ body {
   transform: rotate(-8deg);
 }
 
-.body { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+/* min-height: 0 or the flex item refuses to shrink below its content, which
+   pushed the choice buttons off a short screen instead of scrolling the text. */
+.body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 
 .choices { flex: none; display: flex; flex-direction: column; gap: 10px; }
 .choice {
