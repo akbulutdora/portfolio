@@ -325,6 +325,7 @@
     ids.forEach(function (id) {
       var n = STORY[id], cs = n.choices || [];
       if (!cs.length && !n.end) bad.push(id + ": no choices and no end:true, so the reader gets stuck here");
+      if (!n.art && typeof n.text === "string" && !n.text.trim()) bad.push(id + ": no text and no art, so the card renders empty");
       cs.forEach(function (c, i) {
         var at = id + " choice " + i;
         if (!c.label) bad.push(at + ": no label");

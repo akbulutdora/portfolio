@@ -35,9 +35,20 @@ const UI = {
   coverTitle: "gracie's birthday adventures with dory!",
 };
 
-const START = "scene1";
+const START = "welcome";
 
 const STORY = {
+  /* The opening message. No art, so the text gets the whole card, and the card
+     body already scrolls on its own however long the message runs. The button
+     stays pinned at the bottom while she reads.
+     Both strings are empty on purpose: nothing renders until Dora writes them. */
+  welcome: {
+    text: "",       // the celebration message. "\n\n" between paragraphs.
+    choices: [
+      { label: "", to: "scene1" },   // the button that starts the first story
+    ],
+  },
+
   scene1: {
     art: "art/scene-1-kitchen.png",
     text:
