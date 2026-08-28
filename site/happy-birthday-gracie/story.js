@@ -34,9 +34,8 @@ const UI = {
   // printed on the booklet cover; blank prints nothing
   coverTitle: "gracie's birthday adventures with dory!",
 
-  // Scenes that move on without offering a real choice still need a button, and
-  // Dora has not written these two. Empty means the button does not render.
-  afterDate: "",   // the wine date -> the beer
+  // The club moves on without offering a real choice, so it still needs a button
+  // and Dora has not written its label. Empty means the button does not render.
   afterClub: "",   // the club -> the street
 };
 
@@ -95,10 +94,9 @@ const STORY = {
     text:
       "they are on a date, having wine together. gracie has some colorful eye make up on.\n\n" +
       "gracie: do you like my dress? i got it from ireland!\n\n" +
-      "dory: you have the longest hair ever so i can't see it! but i can't wait to take it off of you later tonight\n\n" +
-      "gracie blushes",
+      "dory: you have the longest hair ever so i can't see it! but i can't wait to take it off of you later tonight",
     choices: [
-      { label: UI.afterDate, to: "beer" },
+      { label: "gracie blushes", to: "beer" },
     ],
   },
 
@@ -115,7 +113,7 @@ const STORY = {
   },
 
   club: {
-    art: "art/scene-7-club.png",
+    art: "art/scene-7-club.gif",
     text: "they are in a club, dancing.",
     choices: [
       { label: UI.afterClub, to: "street" },
