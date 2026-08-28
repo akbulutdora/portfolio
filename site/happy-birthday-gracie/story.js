@@ -43,7 +43,13 @@ const STORY = {
      stays pinned at the bottom while she reads.
      Both strings are empty on purpose: nothing renders until Dora writes them. */
   welcome: {
-    text: "",       // the celebration message. "\n\n" between paragraphs.
+    text:
+      "happy birthday gracie, my love!\n\n" +
+      "you are easily the kindest, smartest, loveliest person i've ever known. i admire you so deeply, like i've admired no one before. even though our adventure had to come to an end, i will carry you with me always. you're a part of me now.\n\n" +
+      "i know that you have to come back to yourself, to be that lovely person everyone i know admires again. and i just want you to know that i'll be waiting for you to contact me.\n\n" +
+      "i hope you'll have a wonderful day and night. i want to hear all about it when we are ready to hang out again.\n\n" +
+      "you've been with me on happy days, on important days, on difficult days. i really appreciate it. it was such a pain not to be with you on your birthday.\n\n" +
+      "so to be able to celebrate with you, i made little silly stories of us celebrating your birthday.",
     choices: [
       { label: "", to: "scene1" },   // the button that starts the first story
     ],
