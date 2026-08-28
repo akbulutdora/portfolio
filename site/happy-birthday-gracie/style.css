@@ -129,7 +129,6 @@ body {
 .card.is-fading .choices { animation: fade-in 260ms ease-out both; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
-.choice--bind { border-style: dashed; }
 
 /* ---- booklet, on screen --------------------------------------------- */
 /* The preview shows a true A5 page, scaled down to the column. What you see

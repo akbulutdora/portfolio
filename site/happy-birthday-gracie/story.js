@@ -25,8 +25,14 @@
    Both are empty on purpose. Nothing renders while they are empty: no bind
    button, no title on the booklet cover. Write them and they appear. */
 const UI = {
-  bind: "",         // the button at the ending that opens the booklet
-  coverTitle: "",   // printed on the booklet cover
+  // the button on the last node of the last story; it opens the booklet
+  bind: "END. print this as a booklet!",
+  // the button on the last node of any other story; use it as the label of a
+  // choice that points at the next story's first node:
+  //   choices: [{ label: UI.next, to: "story2scene1" }]
+  next: "END. go to next story.",
+  // printed on the booklet cover; blank prints nothing
+  coverTitle: "",
 };
 
 const START = "scene1";
