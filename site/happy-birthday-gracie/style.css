@@ -107,6 +107,10 @@ body {
 .chip--bg   { background: var(--bg); }
 .chip--fg   { background: var(--fg); }
 
+/* who is speaking, by colour */
+.say--g { color: var(--c-hair); }
+.say--d { color: var(--c-dory); }
+
 .title { font-size: 22px; font-weight: 600; line-height: 1.25; }
 .note  { color: var(--dim); font-size: 13px; letter-spacing: 0.06em; }
 .stack > * + * { margin-top: 14px; }

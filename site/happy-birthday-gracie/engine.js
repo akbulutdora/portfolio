@@ -50,7 +50,10 @@
     into.innerHTML = "";
     String(str).split(/\n\s*\n/).forEach(function (chunk) {
       var p = document.createElement("p");
-      p.innerHTML = chunk.trim();
+      var t = chunk.trim();
+      if (/^gracie\b/i.test(t)) p.className = "say say--g";
+      else if (/^dory\b/i.test(t)) p.className = "say say--d";
+      p.innerHTML = t;
       into.appendChild(p);
     });
   }
@@ -79,18 +82,24 @@
       var b = document.createElement("button");
       b.type = "button";
       b.className = "choice";
-      b.textContent = val(c.label);
+      b.appendChild(document.createTextNode(val(c.label)));
+      if (c.note) {
+        var note = document.createElement("span");
+        note.className = "choice__note";
+        note.textContent = val(c.note);
+        b.appendChild(note);
+      }
       b.addEventListener("click", function () { choose(c); });
       el.choices.appendChild(b);
     });
 
-    if (node.end) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "choice choice--bind";
-      b.textContent = "Bind this into a booklet";
-      b.addEventListener("click", openBooklet);
-      el.choices.appendChild(b);
+    if (node.end && UI.bind) {
+      var bb = document.createElement("button");
+      bb.type = "button";
+      bb.className = "choice choice--bind";
+      bb.textContent = UI.bind;
+      bb.addEventListener("click", openBooklet);
+      el.choices.appendChild(bb);
     }
 
     el.card.classList.remove("is-fading");
@@ -182,14 +191,12 @@
 
   function coverLeaf() {
     var p = div("page page--cover");
-    var h = document.createElement("h1");
-    h.className = "page__title";
-    h.textContent = document.title;
-    p.appendChild(h);
-    var sub = document.createElement("p");
-    sub.className = "page__sub";
-    sub.textContent = trail.length + (trail.length === 1 ? " scene" : " scenes");
-    p.appendChild(sub);
+    if (UI.coverTitle) {
+      var h = document.createElement("h1");
+      h.className = "page__title";
+      h.textContent = UI.coverTitle;
+      p.appendChild(h);
+    }
     return p;
   }
 
@@ -330,6 +337,9 @@
     });
 
     ids.forEach(function (id) { if (!linked[id]) bad.push(id + ": nothing links to it"); });
+
+    if (typeof UI === "undefined" || !UI.bind) bad.push('UI.bind is empty, so the ending shows no button and the booklet can not be opened');
+    if (typeof UI === "undefined" || !UI.coverTitle) bad.push("UI.coverTitle is empty, so the booklet cover prints blank");
 
     var ends = ids.filter(function (id) { return STORY[id].end; });
     if (!ends.length) bad.push("no node has end:true, so the booklet can never open");

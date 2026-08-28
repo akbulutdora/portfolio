@@ -94,6 +94,11 @@ body.flip-long .sheet--back .sheet__rot {
   -webkit-print-color-adjust: exact;
 }
 
+/* On cream paper the screen colours drop to 3.2:1 and 3.7:1. These are the same
+   two hues, darkened until they hold on paper. Screen keeps the originals. */
+.say--g { color: #a3341c; }
+.say--d { color: #1740b8; }
+
 .page__num   { opacity: 1; color: #6b6257; }
 .page__probe { opacity: 1; color: #3a4650; }
 .page__sub   { opacity: 1; color: #6b6257; }
