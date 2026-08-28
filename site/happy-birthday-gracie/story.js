@@ -54,10 +54,10 @@ const STORY = {
     art: "art/scene-2-cake.png",
     text: (s) =>
       "gracie has taken the cake out of the oven. cake is in between them.\n\n" +
-      'gracie says: "raging success"!\n\n' +
-      'dory says: "it looks amazing! i\'m gonna get so fat!!!"' +
+      "gracie says: raging success!\n\n" +
+      "dory says: it looks amazing! i'm gonna get so fat!!!" +
       (s.kissed
-        ? '\n\ngracie says: "hehehe you\'ll still be so handsome"' +
+        ? "\n\ngracie says: hehehe you'll still be so handsome" +
           "\n\ndory gives gracie a kiss"
         : ""),
     choices: [
@@ -76,8 +76,8 @@ const STORY = {
     art: "art/scene-3-after.png",
     text:
       "their eyes are red from having smoked a joint and dory is fat.\n\n" +
-      'gracie: "that was so much fun!"\n\n' +
-      'dory: "i am so fat now, bitch!!"',
+      "gracie: that was so much fun!\n\n" +
+      "dory: i am so fat now, bitch!!",
     end: true,
     choices: [],
   },
