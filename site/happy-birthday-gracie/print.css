@@ -61,7 +61,7 @@ body.flip-long .sheet--back { transform: rotate(180deg); }
 }
 
 .page__art {
-  width: 55mm;
+  width: var(--booklet-art-w);
   image-rendering: pixelated;
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;

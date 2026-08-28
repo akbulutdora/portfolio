@@ -17,6 +17,9 @@
   --art-h: 144px;
   --art-scale: 2;
 
+  /* how wide the art prints inside an A5 booklet page */
+  --booklet-art-w: 70mm;
+
   /* type */
   --font-body: Literata, Georgia, serif;
   --font-sfx:  "Press Start 2P", monospace;
@@ -183,7 +186,7 @@ body.reading .card { display: none; }
 .page__sub   { margin-top: 8px; font-size: 9pt; opacity: 0.6; }
 .page__num   { font-size: 8pt; letter-spacing: 0.18em; opacity: 0.5; margin-bottom: 6mm; }
 .page__art {
-  display: block; width: 55mm; height: auto;
+  display: block; width: var(--booklet-art-w); height: auto;
   margin: 0 auto 6mm; image-rendering: pixelated;
 }
 .page__text > * + * { margin-top: 10px; }
