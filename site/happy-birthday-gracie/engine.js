@@ -94,7 +94,7 @@
         note.textContent = val(c.note);
         b.appendChild(note);
       }
-      b.addEventListener("click", function () { choose(c); });
+      b.addEventListener("click", function () { b.blur(); choose(c); });
       el.choices.appendChild(b);
     });
 

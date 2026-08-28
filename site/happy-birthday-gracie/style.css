@@ -99,7 +99,13 @@ body {
   text-align: left;
   cursor: pointer;
 }
-.choice:hover, .choice:focus-visible { background: var(--fg); color: var(--bg); }
+/* Hover only where a real pointer exists. On a touch screen WebKit keeps :hover
+   stuck on the tapped spot, so the next scene's button in the same position came
+   up already inverted, as if it were selected. */
+@media (hover: hover) and (pointer: fine) {
+  .choice:hover { background: var(--fg); color: var(--bg); }
+}
+.choice:focus-visible { background: var(--fg); color: var(--bg); }
 .choice:active { transform: translateY(1px); }
 .choice__note { margin-top: 6px; font-size: 14px; opacity: 0.72; }
 
@@ -151,7 +157,9 @@ body.reading .card { display: none; }
   border: 1px solid var(--fg); background: transparent; color: var(--fg);
   font: inherit; font-size: 14px; cursor: pointer;
 }
-.booklet__bar button:hover { background: var(--fg); color: var(--bg); }
+@media (hover: hover) and (pointer: fine) {
+  .booklet__bar button:hover { background: var(--fg); color: var(--bg); }
+}
 
 
 .sheets { display: none; }          /* print only */
