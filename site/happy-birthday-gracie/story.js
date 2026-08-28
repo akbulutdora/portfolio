@@ -56,7 +56,7 @@ const STORY = {
   },
 
   scene1: {
-    art: "art/scene-1-kitchen.png",
+    art: "art/scene-1-kitchen.gif",
     text:
       "they are in the kitchen. gracie is baking the cake. dory is sitting on the kitchen counter, hanging out. they are chatting with joy.\n\n" +
       "gracie: did you know that dogs bark??\n\n" +
@@ -133,7 +133,7 @@ const STORY = {
   },
 
   street: {
-    art: "art/scene-6-street.png",
+    art: "art/scene-6-street.gif",
     text:
       "they are on the street, it's a starry night.\n\n" +
       "dory: happy birthday gracie. i love you.\n\n" +

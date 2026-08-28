@@ -17,8 +17,8 @@
   --dim:  color-mix(in srgb, var(--fg) 55%, transparent);
 
   /* art canvas — one size for every scene */
-  --art-w: 160px;
-  --art-h: 144px;
+  --art-w: 154px;
+  --art-h: 128px;
   --art-scale: 2;
 
   /* how wide the art prints inside an A5 booklet page */
