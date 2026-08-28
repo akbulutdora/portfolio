@@ -139,13 +139,6 @@ body.reading .card { display: none; }
 }
 .booklet__bar button:hover { background: var(--fg); color: var(--bg); }
 
-.booklet__how {
-  padding: 14px 16px;
-  color: var(--dim); font-size: 13px; line-height: 1.5;
-  border-bottom: 1px solid var(--rule);
-}
-.booklet__how b { color: var(--fg); font-weight: 600; }
-.booklet__how label { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
 
 .sheets { display: none; }          /* print only */
 

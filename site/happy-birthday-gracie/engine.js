@@ -19,10 +19,32 @@
 
   function val(x) { return typeof x === "function" ? x(state) : x; }
 
-  // no GIF drawn yet: keep the dashed box instead of a broken image icon
+  // Art that failed to load. Setting img.src to the same URL fires no second
+  // error event, so without this a re-render of the same node (a probe) would
+  // drop the dashed box and show a broken image icon instead.
+  var badArt = Object.create(null);
   el.img.addEventListener("error", function () {
+    badArt[el.img.getAttribute("src")] = true;
     el.art.classList.add("art--missing");
   });
+
+  // Clones lose their listeners, so catch image errors on the way down instead.
+  ["pages", "sheets"].forEach(function (k) {
+    el[k].addEventListener("error", function (e) {
+      if (e.target && e.target.tagName === "IMG") { badArt[e.target.getAttribute("src")] = true; e.target.remove(); }
+    }, true);
+  });
+  // A page measured before its art loads looks shorter than it prints.
+  el.pages.addEventListener("load", function (e) {
+    if (e.target && e.target.tagName === "IMG") flagOverflow();
+  }, true);
+
+  function fail(message) {
+    el.art.hidden = true;
+    el.choices.innerHTML = "";
+    paragraphs(el.text, message);
+    console.error(message);
+  }
 
   function paragraphs(into, str) {
     into.innerHTML = "";
@@ -40,9 +62,14 @@
     var art = val(node.art);
     var text = val(node.text);
 
-    if (art) { el.img.src = art; el.img.alt = val(node.alt) || ""; el.art.hidden = false; }
-    else { el.art.hidden = true; }
-    el.art.classList.remove("art--missing");
+    if (art) {
+      el.art.hidden = false;
+      el.art.classList.toggle("art--missing", !!badArt[art]);
+      if (el.img.getAttribute("src") !== art) el.img.src = art;
+      el.img.alt = val(node.alt) || "";
+    } else {
+      el.art.hidden = true;
+    }
 
     paragraphs(el.text, text);
 
@@ -77,7 +104,7 @@
   /* ---- moving ------------------------------------------------------ */
 
   function go(id) {
-    if (!STORY[id]) { console.error("unknown node:", id); return; }
+    if (!STORY[id]) { fail("This path leads to a node that does not exist: " + id); return; }
     current = id;
     var r = render(id);
     trail.push({ id: id, art: r.art, text: r.text, choice: null, probes: [] });
@@ -93,6 +120,7 @@
 
   function choose(c) {
     if (c.set) Object.assign(state, c.set);
+    if (!trail.length) trail.push({ id: current, art: null, text: "", choice: null, probes: [] });
     var here = trail[trail.length - 1];
     if (c.stay) { here.probes.push(val(c.label)); refresh(); return; }
     here.choice = val(c.label);
@@ -115,6 +143,7 @@
     try {
       var d = JSON.parse(raw);
       if (!d || !STORY[d.current]) return false;   // story changed under the save
+      if (!Array.isArray(d.trail) || !d.trail.length) return false;
       state = d.state || {};
       trail = d.trail || [];
       current = d.current;
@@ -159,7 +188,7 @@
     p.appendChild(h);
     var sub = document.createElement("p");
     sub.className = "page__sub";
-    sub.textContent = trail.length + " scenes";
+    sub.textContent = trail.length + (trail.length === 1 ? " scene" : " scenes");
     p.appendChild(sub);
     return p;
   }
@@ -173,11 +202,10 @@
 
     var inner = div("page__inner");
 
-    if (t.art) {
+    if (t.art && !badArt[t.art]) {
       var im = document.createElement("img");
       im.className = "page__art";
       im.alt = "";
-      im.addEventListener("error", function () { im.remove(); });
       im.src = t.art;
       inner.appendChild(im);
     }
@@ -267,12 +295,64 @@
   /* ---- boot -------------------------------------------------------- */
 
   $("bk-print").addEventListener("click", function () { window.print(); });
-  $("bk-flip").addEventListener("change", function () {
-    document.body.classList.toggle("flip-long", this.checked);
-  });
   window.addEventListener("resize", function () { fitPreview(); flagOverflow(); });
   $("bk-back").addEventListener("click", closeBooklet);
   $("bk-restart").addEventListener("click", restart);
+
+  // Recovery with no interface: thoughtassault.dev/happy-birthday-gracie/?flip=1
+  // turns every back sheet 180 degrees, for a printer that flips the other way.
+  if (/[?&]flip=1/.test(location.search)) document.body.classList.add("flip-long");
+
+  /* ---- authoring check ---------------------------------------------- */
+  /* Runs on every load and only writes to the console. Gracie never sees it. */
+
+  function checkStory() {
+    var ids = Object.keys(STORY), linked = Object.create(null), bad = [];
+    linked[START] = true;
+    if (!STORY[START]) bad.push('START names a node that does not exist: "' + START + '"');
+
+    ids.forEach(function (id) {
+      var n = STORY[id], cs = n.choices || [];
+      if (!cs.length && !n.end) bad.push(id + ": no choices and no end:true, so the reader gets stuck here");
+      cs.forEach(function (c, i) {
+        var at = id + " choice " + i;
+        if (!c.label) bad.push(at + ": no label");
+        if (c.stay) {
+          if (c.to) bad.push(at + ": has both stay and to, so to is ignored");
+          if (!c.set) bad.push(at + ": stay with no set, so nothing changes and the choice never goes away");
+        } else if (typeof c.to === "string") {
+          if (!STORY[c.to]) bad.push(at + ': goes to a node that does not exist: "' + c.to + '"');
+          linked[c.to] = true;
+        } else if (typeof c.to !== "function") {
+          bad.push(at + ": no to");
+        }
+      });
+    });
+
+    ids.forEach(function (id) { if (!linked[id]) bad.push(id + ": nothing links to it"); });
+
+    var ends = ids.filter(function (id) { return STORY[id].end; });
+    if (!ends.length) bad.push("no node has end:true, so the booklet can never open");
+    if (ends.length > 1) bad.push("more than one node has end:true (" + ends.join(", ") + "); the story is meant to converge");
+    return bad;
+  }
+
+  /* ---- boot ---------------------------------------------------------- */
+
+  if (typeof STORY === "undefined" || typeof START === "undefined") {
+    fail("story.js did not load. Check the browser console for a syntax error in it.");
+    return;
+  }
+
+  try {
+    var problems = checkStory();
+    if (problems.length) {
+      console.warn("story check: " + problems.length + " problem(s)");
+      problems.forEach(function (m) { console.warn("  " + m); });
+    } else {
+      console.log("story check: " + Object.keys(STORY).length + " nodes, no problems");
+    }
+  } catch (e) { console.warn("story check failed to run:", e); }
 
   if (!load()) go(START);
 })();
