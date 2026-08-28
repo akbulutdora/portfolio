@@ -51,7 +51,7 @@ const STORY = {
       "you've been with me on happy days, on important days, on difficult days. i really appreciate it. it was such a pain not to be with you on your birthday.\n\n" +
       "so to be able to celebrate with you, i made little silly stories of us celebrating your birthday.",
     choices: [
-      { label: "", to: "scene1" },   // the button that starts the first story
+      { label: "let's go!", to: "scene1" },
     ],
   },
 
@@ -113,7 +113,7 @@ const STORY = {
   },
 
   beer: {
-    art: "art/scene-5-beer.png?v=8e3cb5b6fa",
+    art: "art/scene-5-beer.gif?v=3a063d071b",
     text:
       "they are having beer now\n\n" +
       "gracie: i am getting drunk!\n\n" +
