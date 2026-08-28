@@ -1,0 +1,120 @@
+/* ---- palette ------------------------------------------------------- */
+:root {
+  /* character colours — these live in the art, not the chrome */
+  --c-hair: #dd5639; /* gracie's hair */
+  --c-eyes: #20a5a6; /* gracie's eyes */
+  --c-legs: #036016; /* dory's legs   */
+  --c-dory: #256eff; /* dory's rest   */
+
+  /* chrome */
+  --bg: #0f1b26;
+  --fg: #f5e8d1;
+  --rule: color-mix(in srgb, var(--fg) 22%, transparent);
+  --dim:  color-mix(in srgb, var(--fg) 60%, transparent);
+
+  /* art canvas — one size for every scene */
+  --art-w: 160px;
+  --art-h: 144px;
+  --art-scale: 2;
+}
+
+/* ---- reset --------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body, figure, h1, h2, p { margin: 0; }
+
+/* ---- page ---------------------------------------------------------- */
+body {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, sans-serif; /* PLACEHOLDER until fonts are chosen */
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* ---- the card: art / text / choices -------------------------------- */
+.card {
+  width: min(420px, 100%);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  border-inline: 1px solid var(--rule);
+}
+
+.art {
+  flex: none;
+  align-self: center;
+  width: calc(var(--art-w) * var(--art-scale));
+  height: calc(var(--art-h) * var(--art-scale));
+  max-width: 100%;
+  border: 1px solid var(--rule);
+}
+.art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+/* placeholder look while there is no art yet */
+.art--empty {
+  display: grid;
+  place-items: center;
+  border-style: dashed;
+  color: var(--dim);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.choices {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.choice {
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid var(--fg);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.choice:hover,
+.choice:focus-visible { background: var(--fg); color: var(--bg); }
+.choice:active { transform: translateY(1px); }
+
+/* ---- swatch test (temporary) --------------------------------------- */
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 12px;
+}
+.sw { font-size: 12px; line-height: 1.4; }
+.chip {
+  aspect-ratio: 1;
+  margin-bottom: 6px;
+  border: 1px solid var(--rule);
+}
+.sw code { color: var(--dim); font-size: 11px; }
+.chip--hair { background: var(--c-hair); }
+.chip--eyes { background: var(--c-eyes); }
+.chip--legs { background: var(--c-legs); }
+.chip--dory { background: var(--c-dory); }
+.chip--bg   { background: var(--bg); }
+.chip--fg   { background: var(--fg); }
+
+.title { font-size: 20px; font-weight: 600; letter-spacing: 0.02em; }
+.note  { margin-top: 16px; color: var(--dim); font-size: 13px; }
