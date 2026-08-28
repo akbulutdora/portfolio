@@ -74,7 +74,6 @@ const STORY = {
     choices: [
       {
         label: "hehehe you'll still be so handsome",
-        note: "this might make you sad, so choose the other option!!!",
         stay: true,
         set: { kissed: true },
         if: (s) => !s.kissed,
