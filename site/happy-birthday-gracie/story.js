@@ -102,7 +102,7 @@ const STORY = {
   /* ---- story 2 ----------------------------------------------------- */
 
   date: {
-    art: "art/scene-4-date.png?v=38e7e88833",
+    art: "art/scene-4-date.gif?v=76ed7de0ea",
     text:
       "gracie and dora are on a date, having wine together. gracie has beautiful colorful make up on.\n\n" +
       "gracie: do you like my dress? i got it from ireland!\n\n" +
