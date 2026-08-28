@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /coolwave/
+Disallow: /happy-birthday-gracie/
 Sitemap: https://thoughtassault.dev/sitemap.xml
