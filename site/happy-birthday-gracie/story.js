@@ -33,10 +33,6 @@ const UI = {
   next: "END. go to next story.",
   // printed on the booklet cover; blank prints nothing
   coverTitle: "gracie's birthday adventures with dory!",
-
-  // The club moves on without offering a real choice, so it still needs a button
-  // and Dora has not written its label. Empty means the button does not render.
-  afterClub: "",   // the club -> the street
 };
 
 const START = "scene1";
@@ -116,7 +112,7 @@ const STORY = {
     art: "art/scene-7-club.gif",
     text: "they are in a club, dancing.",
     choices: [
-      { label: UI.afterClub, to: "street" },
+      { label: "they're getting tired. it's time to go home now.", to: "street" },
     ],
   },
 
