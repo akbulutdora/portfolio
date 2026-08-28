@@ -39,8 +39,9 @@ html, body {
 .sheet {
   container-type: size;      /* lets the rotated child read the page dimensions */
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 100vw;              /* the page box, not the screen: percentages of an
+                                auto-height ancestor collapse to zero in print */
+  height: 100vh;
   break-after: page;
   break-inside: avoid;
   overflow: hidden;
