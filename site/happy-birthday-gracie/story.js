@@ -33,6 +33,11 @@ const UI = {
   next: "END. go to next story.",
   // printed on the booklet cover; blank prints nothing
   coverTitle: "gracie's birthday adventures with dory!",
+
+  // Scenes that move on without offering a real choice still need a button, and
+  // Dora has not written these two. Empty means the button does not render.
+  afterDate: "",   // the wine date -> the beer
+  afterClub: "",   // the club -> the street
 };
 
 const START = "scene1";
@@ -78,6 +83,52 @@ const STORY = {
       "their eyes are red from having smoked a joint and dory is fat.\n\n" +
       "gracie: that was so much fun!\n\n" +
       "dory: i am so fat now, bitch!!",
+    choices: [
+      { label: UI.next, to: "date" },
+    ],
+  },
+
+  /* ---- story 2 ----------------------------------------------------- */
+
+  date: {
+    art: "art/scene-4-date.png",
+    text:
+      "they are on a date, having wine together. gracie has some colorful eye make up on.\n\n" +
+      "gracie: do you like my dress? i got it from ireland!\n\n" +
+      "dory: you have the longest hair ever so i can't see it! but i can't wait to take it off of you later tonight\n\n" +
+      "gracie blushes",
+    choices: [
+      { label: UI.afterDate, to: "beer" },
+    ],
+  },
+
+  beer: {
+    art: "art/scene-5-beer.png",
+    text:
+      "they are having beer now\n\n" +
+      "gracie: i am getting drunk!\n\n" +
+      "dory: i don't feel anything yet! i have to drink more!",
+    choices: [
+      { label: "let's walk home afterwards!", to: "street" },
+      { label: "let's go dancing afterwards!", to: "club", set: { danced: true } },
+    ],
+  },
+
+  club: {
+    art: "art/scene-7-club.png",
+    text: "they are in a club, dancing.",
+    choices: [
+      { label: UI.afterClub, to: "street" },
+    ],
+  },
+
+  street: {
+    art: "art/scene-6-street.png",
+    text:
+      "they are on the street on a starry night\n\n" +
+      "dory: happy birthday gracie. i love you.\n\n" +
+      "gracie: i love you too dory. thank you for tonight!\n\n" +
+      "dory: you're welcome bitch!",
     end: true,
     choices: [],
   },

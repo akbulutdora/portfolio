@@ -49,8 +49,9 @@
   function paragraphs(into, str) {
     into.innerHTML = "";
     String(str).split(/\n\s*\n/).forEach(function (chunk) {
-      var p = document.createElement("p");
       var t = chunk.trim();
+      if (!t) return;
+      var p = document.createElement("p");
       // A speaker line is the name and a colon, nothing else: "gracie:" colours,
       // "gracie has taken the cake out of the oven." does not.
       if (/^gracie\s*:/i.test(t)) p.className = "say say--g";
@@ -81,10 +82,12 @@
     el.choices.innerHTML = "";
     (node.choices || []).forEach(function (c) {
       if (c.if && !c.if(state)) return;
+      var label = val(c.label);
+      if (!label) return;               // Dora has not written this one yet
       var b = document.createElement("button");
       b.type = "button";
       b.className = "choice";
-      b.appendChild(document.createTextNode(val(c.label)));
+      b.appendChild(document.createTextNode(label));
       if (c.note) {
         var note = document.createElement("span");
         note.className = "choice__note";
