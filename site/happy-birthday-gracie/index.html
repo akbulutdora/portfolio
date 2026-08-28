@@ -6,12 +6,11 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0f1b26">
 <title>shape test</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,300..600&family=Newsreader:opsz,wght@6..72,300..600&family=Source+Serif+4:opsz,wght@8..60,300..600&family=Outfit:wght@300..600&family=Press+Start+2P&display=swap">
+<link rel="preload" href="fonts/literata-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-font="literata">
+<body>
 <main class="card">
 
   <div class="art art--empty">
@@ -26,16 +25,9 @@
     year, when the clouds hung oppressively low in the heavens, I had been
     passing alone, on horseback, through a singularly dreary tract of country,
     and at length found myself, as the shades of the evening drew on, within
-    view of the melancholy House of Usher.</p>
+    view of the melancholy <em>House of Usher</em>.</p>
 
-    <p class="note">&uarr; Poe, 1839. Placeholder for measuring a reading face.</p>
-
-    <div class="fonts">
-      <button class="fontbtn" type="button" data-set="literata">Literata</button>
-      <button class="fontbtn" type="button" data-set="newsreader">Newsreader</button>
-      <button class="fontbtn" type="button" data-set="source">Source Serif 4</button>
-      <button class="fontbtn" type="button" data-set="outfit">Outfit</button>
-    </div>
+    <p class="note">&uarr; Poe, 1839. Placeholder. Roman, <em>italic</em>, Türkçe: ğ ş ı İ ö ü ç</p>
 
     <div class="note">palette</div>
     <div class="swatches">
@@ -54,18 +46,5 @@
   </div>
 
 </main>
-<script>
-  const KEY = "hbg-font";
-  const btns = document.querySelectorAll(".fontbtn");
-  function pick(name) {
-    document.body.dataset.font = name;
-    btns.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.set === name)));
-    try { localStorage.setItem(KEY, name); } catch {}
-  }
-  btns.forEach(b => b.addEventListener("click", () => pick(b.dataset.set)));
-  let saved = null;
-  try { saved = localStorage.getItem(KEY); } catch {}
-  pick(saved || "literata");
-</script>
 </body>
 </html>

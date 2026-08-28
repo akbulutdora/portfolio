@@ -17,15 +17,11 @@
   --art-h: 144px;
   --art-scale: 2;
 
-  /* type — switched by [data-font] below */
+  /* type */
   --font-body: Literata, Georgia, serif;
+  --font-sfx:  "Press Start 2P", monospace;
   --font-size: 17px;
 }
-
-body[data-font="literata"] { --font-body: Literata, Georgia, serif; }
-body[data-font="newsreader"] { --font-body: Newsreader, Georgia, serif; }
-body[data-font="source"] { --font-body: "Source Serif 4", Georgia, serif; }
-body[data-font="outfit"] { --font-body: Outfit, system-ui, sans-serif; }
 
 /* ---- reset --------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -72,7 +68,7 @@ body {
 /* what Press Start 2P is actually for */
 .sfx {
   position: absolute; right: 10px; top: 14px;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--font-sfx);
   font-size: 13px; line-height: 1; color: var(--c-hair);
   transform: rotate(-8deg);
 }
@@ -107,19 +103,6 @@ body {
 .chip--dory { background: var(--c-dory); }
 .chip--bg   { background: var(--bg); }
 .chip--fg   { background: var(--fg); }
-
-/* ---- font switcher (temporary) ------------------------------------- */
-.fonts { display: flex; flex-wrap: wrap; gap: 6px; }
-.fontbtn {
-  padding: 6px 10px;
-  border: 1px solid var(--rule);
-  background: transparent;
-  color: var(--dim);
-  font-family: var(--font-body);
-  font-size: 12px;
-  cursor: pointer;
-}
-.fontbtn[aria-pressed="true"] { border-color: var(--fg); color: var(--fg); }
 
 .title { font-size: 22px; font-weight: 600; line-height: 1.25; }
 .note  { color: var(--dim); font-size: 13px; letter-spacing: 0.06em; }
