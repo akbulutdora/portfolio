@@ -61,7 +61,10 @@ body {
 /* ---- the card: art / text / choices -------------------------------- */
 .card {
   width: min(420px, 100%);
-  min-height: 100dvh;
+  /* A fixed height, not a minimum: with only a minimum the card grows past the
+     screen and flex has no free space to take away from the text column, so the
+     buttons end up below the fold. Fixed height makes .body scroll instead. */
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   gap: 20px;
