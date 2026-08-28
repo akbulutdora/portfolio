@@ -17,7 +17,7 @@
   --dim:  color-mix(in srgb, var(--fg) 55%, transparent);
 
   /* art canvas — one size for every scene */
-  --art-w: 154px;
+  --art-w: 156px;
   --art-h: 128px;
   --art-scale: 2;
 

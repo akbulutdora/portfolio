@@ -56,7 +56,7 @@ const STORY = {
   },
 
   scene1: {
-    art: "art/scene-1-kitchen.gif",
+    art: "art/scene-1-kitchen.gif?v=28f94d5896",
     text:
       "they are in the kitchen. gracie is baking the cake. dory is sitting on the kitchen counter, hanging out. they are chatting with joy.\n\n" +
       "gracie: did you know that dogs bark??\n\n" +
@@ -68,7 +68,7 @@ const STORY = {
   },
 
   scene2: {
-    art: "art/scene-2-cake.png",
+    art: "art/scene-2-cake.gif?v=7e27695351",
     text: (s) =>
       "gracie has taken the cake out of the oven. cake is in between them.\n\n" +
       "gracie: raging success!\n\n" +
@@ -89,7 +89,7 @@ const STORY = {
   },
 
   scene3: {
-    art: "art/scene-3-after.png",
+    art: "art/scene-3-after.png?v=1be8af0d95",
     text:
       "their eyes are red from having smoked a joint and dory is fat.\n\n" +
       "gracie: that was so much fun!\n\n" +
@@ -102,7 +102,7 @@ const STORY = {
   /* ---- story 2 ----------------------------------------------------- */
 
   date: {
-    art: "art/scene-4-date.png",
+    art: "art/scene-4-date.png?v=38e7e88833",
     text:
       "gracie and dora are on a date, having wine together. gracie has beautiful colorful make up on.\n\n" +
       "gracie: do you like my dress? i got it from ireland!\n\n" +
@@ -113,7 +113,7 @@ const STORY = {
   },
 
   beer: {
-    art: "art/scene-5-beer.png",
+    art: "art/scene-5-beer.png?v=8e3cb5b6fa",
     text:
       "they are having beer now\n\n" +
       "gracie: i am getting drunk!\n\n" +
@@ -125,7 +125,7 @@ const STORY = {
   },
 
   club: {
-    art: "art/scene-7-club.gif",
+    art: "art/scene-7-club.gif?v=be5133e6ae",
     text: "they're dancing at shacklewell arms. it's so much fun",
     choices: [
       { label: "they're getting tired. it's time to go home now.", to: "street" },
@@ -133,7 +133,7 @@ const STORY = {
   },
 
   street: {
-    art: "art/scene-6-street.gif",
+    art: "art/scene-6-street.gif?v=a0a9b2b86a",
     text:
       "they are on the street, it's a starry night.\n\n" +
       "dory: happy birthday gracie. i love you.\n\n" +
