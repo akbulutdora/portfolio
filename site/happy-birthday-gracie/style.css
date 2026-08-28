@@ -30,6 +30,14 @@
   --font-size: 17px;
 }
 
+/* A short viewport, which mostly means a phone turned sideways. The art is a
+   fixed height and will not shrink, so at 390 px tall the choice buttons fell
+   below the fold and the card had to be scrolled to reach them. Halving the
+   scale keeps the pixel grid whole and puts the buttons back on screen. */
+@media (max-height: 600px) {
+  :root { --art-scale: 1; }
+}
+
 /* ---- reset --------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
