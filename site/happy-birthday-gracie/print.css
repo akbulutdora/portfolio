@@ -5,7 +5,8 @@
 
 @page { size: A4 landscape; margin: 0; }
 
-body {
+html, body {
+  height: 100%;
   background: #f5e8d1;
   color: #0f1b26;
   display: block;
@@ -27,9 +28,11 @@ body {
 
 .sheets { display: block !important; }
 
+/* Sized in percent, not millimetres: whatever paper is loaded, the sheet fills
+   it and the fold stays in the middle. A4 and US Letter both work. */
 .sheet {
-  width: 297mm;
-  height: 210mm;
+  width: 100%;
+  height: 100%;
   display: flex;
   break-after: page;
   break-inside: avoid;
@@ -41,8 +44,8 @@ body {
 body.flip-long .sheet--back { transform: rotate(180deg); }
 
 .half {
-  width: 148.5mm;
-  height: 210mm;
+  width: 50%;
+  height: 100%;
   overflow: hidden;
 }
 .half--left  { padding: 14mm 16mm 14mm 12mm; }   /* right edge is the fold */
