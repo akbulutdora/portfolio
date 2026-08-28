@@ -220,11 +220,13 @@
     el.sheets.innerHTML = "";
     impose(leaves.length).forEach(function (pair, side) {
       var sheet = div("sheet" + (side % 2 ? " sheet--back" : " sheet--front"));
+      var rot = div("sheet__rot");   // print.css turns this sideways on the paper
       pair.forEach(function (n, k) {
         var half = div("half half--" + (k === 0 ? "left" : "right"));
         if (n) half.appendChild(leaves[n - 1].cloneNode(true));
-        sheet.appendChild(half);
+        rot.appendChild(half);
       });
+      sheet.appendChild(rot);
       el.sheets.appendChild(sheet);
     });
 
