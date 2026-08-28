@@ -92,7 +92,7 @@ const STORY = {
   date: {
     art: "art/scene-4-date.png",
     text:
-      "they are on a date, having wine together. gracie has some colorful eye make up on.\n\n" +
+      "gracie and dora are on a date, having wine together. gracie has beautiful colorful make up on.\n\n" +
       "gracie: do you like my dress? i got it from ireland!\n\n" +
       "dory: you have the longest hair ever so i can't see it! but i can't wait to take it off of you later tonight",
     choices: [
