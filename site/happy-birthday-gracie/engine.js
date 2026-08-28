@@ -51,10 +51,10 @@
     String(str).split(/\n\s*\n/).forEach(function (chunk) {
       var p = document.createElement("p");
       var t = chunk.trim();
-      // A speaker line is the name, then a colon within a few characters:
-      // "gracie:" and "gracie says:" colour, "gracie has taken the cake" does not.
-      if (/^gracie\b[^:]{0,12}:/i.test(t)) p.className = "say say--g";
-      else if (/^dory\b[^:]{0,12}:/i.test(t)) p.className = "say say--d";
+      // A speaker line is the name and a colon, nothing else: "gracie:" colours,
+      // "gracie has taken the cake out of the oven." does not.
+      if (/^gracie\s*:/i.test(t)) p.className = "say say--g";
+      else if (/^dory\s*:/i.test(t)) p.className = "say say--d";
       p.innerHTML = t;
       into.appendChild(p);
     });

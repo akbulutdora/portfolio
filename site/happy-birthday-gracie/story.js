@@ -54,10 +54,10 @@ const STORY = {
     art: "art/scene-2-cake.png",
     text: (s) =>
       "gracie has taken the cake out of the oven. cake is in between them.\n\n" +
-      "gracie says: raging success!\n\n" +
-      "dory says: it looks amazing! i'm gonna get so fat!!!" +
+      "gracie: raging success!\n\n" +
+      "dory: it looks amazing! i'm gonna get so fat!!!" +
       (s.kissed
-        ? "\n\ngracie says: hehehe you'll still be so handsome" +
+        ? "\n\ngracie: hehehe you'll still be so handsome" +
           "\n\ndory gives gracie a kiss"
         : ""),
     choices: [
