@@ -6,30 +6,46 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0f1b26">
 <title>shape test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,300..600&family=Newsreader:opsz,wght@6..72,300..600&family=Source+Serif+4:opsz,wght@8..60,300..600&family=Outfit:wght@300..600&family=Press+Start+2P&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-font="literata">
 <main class="card">
 
-  <div class="art art--empty">160 &times; 144</div>
+  <div class="art art--empty">
+    <span class="art__label">160 &times; 144</span>
+    <span class="sfx">KABOOM</span>
+  </div>
 
-  <div class="body">
-    <h1 class="title">NODE TEXT HERE</h1>
-    <p class="note">Body text sits here. This paragraph exists only to show the
-    measure, the line height, and how far the text can run before the choices
-    push it into a scroll.</p>
+  <div class="body stack">
+    <h1 class="title">NODE TITLE HERE</h1>
+
+    <p>During the whole of a dull, dark, and soundless day in the autumn of the
+    year, when the clouds hung oppressively low in the heavens, I had been
+    passing alone, on horseback, through a singularly dreary tract of country,
+    and at length found myself, as the shades of the evening drew on, within
+    view of the melancholy House of Usher.</p>
+
+    <p class="note">&uarr; Poe, 1839. Placeholder for measuring a reading face.</p>
+
+    <div class="fonts">
+      <button class="fontbtn" type="button" data-set="literata">Literata</button>
+      <button class="fontbtn" type="button" data-set="newsreader">Newsreader</button>
+      <button class="fontbtn" type="button" data-set="source">Source Serif 4</button>
+      <button class="fontbtn" type="button" data-set="outfit">Outfit</button>
+    </div>
 
     <div class="note">palette</div>
     <div class="swatches">
-      <figure class="sw"><div class="chip chip--hair"></div>hair<br><code>#dd5639</code></figure>
-      <figure class="sw"><div class="chip chip--eyes"></div>eyes<br><code>#20a5a6</code></figure>
-      <figure class="sw"><div class="chip chip--legs"></div>legs<br><code>#036016</code></figure>
-      <figure class="sw"><div class="chip chip--dory"></div>dory<br><code>#256eff</code></figure>
-      <figure class="sw"><div class="chip chip--bg"></div>bg<br><code>#0f1b26</code></figure>
-      <figure class="sw"><div class="chip chip--fg"></div>text<br><code>#f5e8d1</code></figure>
+      <figure class="sw"><div class="chip chip--hair"></div>hair #dd5639</figure>
+      <figure class="sw"><div class="chip chip--eyes"></div>eyes #20a5a6</figure>
+      <figure class="sw"><div class="chip chip--legs"></div>legs #036016</figure>
+      <figure class="sw"><div class="chip chip--dory"></div>dory #256eff</figure>
+      <figure class="sw"><div class="chip chip--bg"></div>bg #0f1b26</figure>
+      <figure class="sw"><div class="chip chip--fg"></div>text #f5e8d1</figure>
     </div>
-
-    <p class="note">Font is system-ui as a placeholder.</p>
   </div>
 
   <div class="choices">
@@ -38,5 +54,18 @@
   </div>
 
 </main>
+<script>
+  const KEY = "hbg-font";
+  const btns = document.querySelectorAll(".fontbtn");
+  function pick(name) {
+    document.body.dataset.font = name;
+    btns.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.set === name)));
+    try { localStorage.setItem(KEY, name); } catch {}
+  }
+  btns.forEach(b => b.addEventListener("click", () => pick(b.dataset.set)));
+  let saved = null;
+  try { saved = localStorage.getItem(KEY); } catch {}
+  pick(saved || "literata");
+</script>
 </body>
 </html>
