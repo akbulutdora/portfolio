@@ -110,7 +110,7 @@ const STORY = {
 
   club: {
     art: "art/scene-7-club.gif",
-    text: "they are in a club, dancing.",
+    text: "they're dancing at shacklewell arms. it's so much fun",
     choices: [
       { label: "they're getting tired. it's time to go home now.", to: "street" },
     ],
@@ -119,10 +119,11 @@ const STORY = {
   street: {
     art: "art/scene-6-street.png",
     text:
-      "they are on the street on a starry night\n\n" +
+      "they are on the street, it's a starry night.\n\n" +
       "dory: happy birthday gracie. i love you.\n\n" +
       "gracie: i love you too dory. thank you for tonight!\n\n" +
-      "dory: you're welcome bitch!",
+      "dory: you're welcome bitch!\n\n" +
+      "they went home, and hung out for another BILLION HOURS!",
     end: true,
     choices: [],
   },
