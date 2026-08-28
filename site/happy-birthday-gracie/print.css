@@ -1,0 +1,51 @@
+/* The booklet on paper. Same two colours, inverted: cream page, dark ink. */
+
+@page { size: A5; margin: 14mm; }
+
+body {
+  background: #f5e8d1;
+  color: #0f1b26;
+  display: block;
+  font-size: 11pt;
+  line-height: 1.55;
+}
+
+/* only the booklet prints */
+.card,
+.booklet__bar { display: none !important; }
+
+.booklet {
+  position: static;
+  overflow: visible;
+  background: none;
+  display: block !important;
+}
+.booklet[hidden] { display: none !important; }
+
+.pages { display: block; padding: 0; gap: 0; }
+
+.page {
+  width: auto;
+  padding: 0;
+  background: none;
+  color: inherit;
+  break-after: page;
+  break-inside: avoid;
+}
+.page:last-child { break-after: auto; }
+
+.page--cover { padding-block: 0; }
+.page__title { font-size: 20pt; }
+
+.page__art {
+  width: 70mm;
+  max-width: 70mm;
+  margin: 0 auto 8mm;
+  image-rendering: pixelated;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.page__num   { opacity: 1; color: #6b6257; }
+.page__probe { opacity: 1; color: #3a4650; }
+.page__choice { opacity: 1; }

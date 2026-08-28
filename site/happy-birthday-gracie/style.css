@@ -107,3 +107,68 @@ body {
 .title { font-size: 22px; font-weight: 600; line-height: 1.25; }
 .note  { color: var(--dim); font-size: 13px; letter-spacing: 0.06em; }
 .stack > * + * { margin-top: 14px; }
+
+/* ---- scene change --------------------------------------------------- */
+.card.is-fading .art,
+.card.is-fading .body,
+.card.is-fading .choices { animation: fade-in 260ms ease-out both; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.choice--bind { border-style: dashed; }
+
+/* ---- booklet, on screen --------------------------------------------- */
+body.reading .card { display: none; }
+
+.booklet { position: fixed; inset: 0; z-index: 10; overflow-y: auto; background: var(--bg); }
+.booklet__bar {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule);
+}
+.booklet__bar button {
+  flex: 1; min-height: 44px; padding: 8px 12px;
+  border: 1px solid var(--fg); background: transparent; color: var(--fg);
+  font: inherit; font-size: 14px; cursor: pointer;
+}
+.booklet__bar button:hover { background: var(--fg); color: var(--bg); }
+
+.pages {
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  padding: 18px 16px calc(24px + env(safe-area-inset-bottom));
+}
+.page {
+  width: min(420px, 100%);
+  padding: 26px 22px;
+  background: var(--fg);    /* paper */
+  color: var(--bg);         /* ink   */
+}
+.page--cover { text-align: center; padding-block: 56px; }
+.page__title { font-size: 26px; font-weight: 700; line-height: 1.2; }
+.page__sub   { margin-top: 8px; font-size: 13px; opacity: 0.6; }
+.page__num   { font-size: 11px; letter-spacing: 0.18em; opacity: 0.5; margin-bottom: 14px; }
+.page__art {
+  display: block; width: 100%; max-width: 288px; height: auto;
+  margin: 0 auto 18px; image-rendering: pixelated;
+}
+.page__text > * + * { margin-top: 12px; }
+.page__probe {
+  margin-top: 12px; padding-left: 12px;
+  border-left: 2px solid currentColor;
+  font-style: italic; font-size: 15px; opacity: 0.75;
+}
+.page__choice {
+  margin-top: 16px; padding-top: 12px;
+  border-top: 1px solid currentColor;
+  font-size: 14px; letter-spacing: 0.04em;
+}
+.page__choice::before { content: "→ "; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* no GIF for this node yet */
+.art--missing { border-style: dashed; }
+.art--missing img { visibility: hidden; }

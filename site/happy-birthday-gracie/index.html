@@ -5,46 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0f1b26">
-<title>shape test</title>
+<title>TITLE HERE</title>
 <link rel="preload" href="fonts/literata-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="print.css" media="print">
 </head>
 <body>
-<main class="card">
 
-  <div class="art art--empty">
-    <span class="art__label">160 &times; 144</span>
-    <span class="sfx">KABOOM</span>
+<main class="card" id="card">
+  <div class="art" id="art">
+    <img id="art-img" src="" alt="">
   </div>
-
-  <div class="body stack">
-    <h1 class="title">NODE TITLE HERE</h1>
-
-    <p>During the whole of a dull, dark, and soundless day in the autumn of the
-    year, when the clouds hung oppressively low in the heavens, I had been
-    passing alone, on horseback, through a singularly dreary tract of country,
-    and at length found myself, as the shades of the evening drew on, within
-    view of the melancholy <em>House of Usher</em>.</p>
-
-    <p class="note">&uarr; Poe, 1839. Placeholder. Roman, <em>italic</em>, Türkçe: ğ ş ı İ ö ü ç</p>
-
-    <div class="note">palette</div>
-    <div class="swatches">
-      <figure class="sw"><div class="chip chip--hair"></div>hair #dd5639</figure>
-      <figure class="sw"><div class="chip chip--eyes"></div>eyes #20a5a6</figure>
-      <figure class="sw"><div class="chip chip--legs"></div>legs #036016</figure>
-      <figure class="sw"><div class="chip chip--dory"></div>dory #256eff</figure>
-      <figure class="sw"><div class="chip chip--bg"></div>bg #0f1b26</figure>
-      <figure class="sw"><div class="chip chip--fg"></div>text #f5e8d1</figure>
-    </div>
+  <div class="body">
+    <div id="text"></div>
   </div>
-
-  <div class="choices">
-    <button class="choice" type="button">CHOICE ONE HERE</button>
-    <button class="choice" type="button">CHOICE TWO HERE</button>
-  </div>
-
+  <div class="choices" id="choices"></div>
 </main>
+
+<div class="booklet" id="booklet" hidden>
+  <div class="booklet__bar">
+    <button type="button" id="bk-back">Back</button>
+    <button type="button" id="bk-print">Save as PDF</button>
+    <button type="button" id="bk-restart">Start over</button>
+  </div>
+  <div class="pages" id="pages"></div>
+</div>
+
+<script src="story.js"></script>
+<script src="engine.js"></script>
 </body>
 </html>
