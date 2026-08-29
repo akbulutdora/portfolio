@@ -34,7 +34,9 @@ html, body, .booklet, .sheets {
 
 .sheets {
   display: block !important;
-  height: auto;
+  /* 100%, not auto: .sheet is height:100% and needs this link in the chain.
+     Setting auto here collapsed every sheet and printed one blank page. */
+  height: 100%;
   overflow: visible;
   visibility: visible;
 }
