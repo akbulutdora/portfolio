@@ -153,7 +153,9 @@ body {
    and below the text splits the free space evenly, while the buttons stay put
    at the bottom of the card. */
 .card--title .art { margin-top: auto; }
-.card--title .body { flex: 0 1 auto; margin-bottom: auto; }
+/* overflow visible, because the title box ends up 2px short of its own text
+   through line-height rounding, and an auto overflow drew a scrollbar for it. */
+.card--title .body { flex: 0 1 auto; margin-bottom: auto; overflow: visible; }
 .note  { color: var(--dim); font-size: 13px; letter-spacing: 0.06em; }
 .stack > * + * { margin-top: 14px; }
 
