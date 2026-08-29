@@ -355,24 +355,28 @@
     wraps.forEach(function (wrap) {
       var page = wrap.firstChild;
       var inner = page.querySelector(".page__inner");
-      while (inner && inner.scrollHeight > inner.clientHeight + 1 &&
-             inner.children.length > 1 && guard++ < 400) {
+      if (!inner) return;
+      var over = function () { return inner.scrollHeight > inner.clientHeight + 1; };
+
+      while (over() && guard++ < 400) {
         var next = div("page");
         var ni = div("page__inner");
         next.appendChild(ni);
-        while (inner.scrollHeight > inner.clientHeight + 1 && inner.children.length > 1) {
+
+        // whole blocks first
+        while (over() && inner.children.length > 1) {
           ni.insertBefore(inner.lastChild, ni.firstChild);
         }
-        // A single paragraph can be taller than a whole page. When that is all
-        // that is left, break inside it and carry the tail words over.
-        if (inner.scrollHeight > inner.clientHeight + 1 && inner.children.length === 1) {
+
+        // then inside the last block, because one paragraph of the letter is
+        // taller than a whole page on its own
+        if (over() && inner.children.length === 1) {
           var block = inner.firstChild;
-          var lastP = block.lastElementChild || block;
+          var lastP = block.lastElementChild;
           if (lastP && lastP.childNodes.length > 1) {
-            var carry = document.createElement(lastP.tagName || "p");
+            var carry = document.createElement(lastP.tagName);
             carry.className = lastP.className;
-            while (inner.scrollHeight > inner.clientHeight + 1 &&
-                   lastP.childNodes.length > 1) {
+            while (over() && lastP.childNodes.length > 1) {
               carry.insertBefore(lastP.lastChild, carry.firstChild);
             }
             var holder = div(block.className);
@@ -380,6 +384,9 @@
             ni.insertBefore(holder, ni.firstChild);
           }
         }
+
+        if (!ni.childNodes.length) break;   // nothing could move; stop rather than spin
+
         var nw = div("page-wrap");
         nw.appendChild(next);
         el.pages.insertBefore(nw, wrap.nextSibling);
