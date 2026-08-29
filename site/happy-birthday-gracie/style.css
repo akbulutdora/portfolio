@@ -193,8 +193,6 @@ body.reading .card { display: none; }
   .booklet__bar button:hover { background: var(--fg); color: var(--bg); }
 }
 .booklet__bar button.is-waiting { opacity: 0.5; }
-@media (hover: hover) and (pointer: fine) {
-}
 
 
 .sheets { display: none; }          /* print only */
