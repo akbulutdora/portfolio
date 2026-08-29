@@ -15,7 +15,7 @@
     body: document.querySelector(".body"),
     text: $("text"), choices: $("choices"),
     booklet: $("booklet"), pages: $("pages"), sheets: $("sheets"),
-    poem: $("poem"), poemLines: $("poem-lines"),
+    poem: $("poem"), poemLines: $("poem-lines"), tail: $("tail"),
     audio: $("pl-audio"), toggle: $("pl-toggle"), seek: $("pl-seek"),
   };
 
@@ -80,6 +80,8 @@
     }
 
     renderAudio(node.audio);
+    el.tail.innerHTML = node.tail || "";
+    el.tail.hidden = !node.tail;
     el.text.classList.toggle("is-heading", !!node.heading);
     el.card.classList.toggle("card--title", !!node.heading);
     el.card.classList.toggle("card--flow", !!node.flow);
@@ -392,7 +394,6 @@
 
   $("bk-print").addEventListener("click", function () { window.print(); });
   window.addEventListener("resize", function () { fitPreview(); flagOverflow(); });
-  $("bk-back").addEventListener("click", closeBooklet);
   $("bk-restart").addEventListener("click", restart);
 
   // Recovery with no interface: thoughtassault.dev/happy-birthday-gracie/?flip=1

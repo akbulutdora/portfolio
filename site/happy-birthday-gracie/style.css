@@ -283,6 +283,9 @@ body.reading .card { display: none; }
 /* the line being read, in Gracie's colour */
 .poem__line.is-now { color: var(--c-hair); }
 
+/* the sign-off, which sits after the poem as it does on the paper */
+.tail { margin-top: 26px; }
+
 /* One word of the handwriting. The PNG is an alpha mask, not a picture of ink,
    so the colour comes from the text colour and one file serves every context. */
 .hw__w {
