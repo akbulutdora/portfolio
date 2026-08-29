@@ -56,6 +56,10 @@ const STORY = {
     // cleaned pages; the words are alpha masks, so CSS colours them.
     text: LETTER.html,
     tail: LETTER.tail,
+    // Where the letter breaks across booklet pages. A number starts a new page
+    // at that paragraph; [paragraph, word] cuts inside one. Paragraph 5 is
+    // taller than a whole page on its own, so it has to be cut somewhere.
+    bookletBreaks: [3, 4, [5, 78], 6, 7],
     // The poem, read aloud, under the letter. lines stays empty until the
     // handwriting from page 2 is extracted and mapped to the word timings in
     // content/audio/poem-timings.json.
