@@ -201,9 +201,17 @@ body.reading .card { display: none; }
    out with zero height and clipped instead, so the images decode while nothing
    shows and the page does not grow. */
 .sheets {
-  height: 0;
-  overflow: hidden;
-  visibility: hidden;
+  /* Rendered, but parked far off screen. Neither display:none nor
+     visibility:hidden works: WebKit decodes no images in either, so the printed
+     letter came out blank while the scene pictures, which also appear in the
+     visible preview, printed fine. Fixed positioning keeps it out of the
+     document's scroll. */
+  position: fixed;
+  left: -30000px;
+  top: 0;
+  width: 300mm;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .pages {

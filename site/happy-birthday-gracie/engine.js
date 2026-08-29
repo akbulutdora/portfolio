@@ -551,6 +551,20 @@
   // blank. Ten seconds is a ceiling, not a wait: it prints as soon as they land.
   $("bk-print").addEventListener("click", function () {
     var imgs = [].slice.call(el.sheets.querySelectorAll("img"));
+    // decode() forces the pixels to be ready whatever the element's visibility.
+    // Waiting on load alone was not enough: the file had arrived but WebKit had
+    // not decoded it, so the print snapshot had nothing to draw.
+    if (imgs.length && imgs[0].decode) {
+      var btnD = this;
+      btnD.classList.add("is-waiting");
+      Promise.all(imgs.map(function (i) {
+        return i.decode ? i.decode().catch(function () {}) : null;
+      })).then(function () {
+        btnD.classList.remove("is-waiting");
+        window.print();
+      });
+      return;
+    }
     var pending = imgs.filter(function (i) { return !i.complete; });
     if (!pending.length) { window.print(); return; }
 

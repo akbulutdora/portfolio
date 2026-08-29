@@ -34,6 +34,12 @@ html, body, .booklet, .sheets {
 
 .sheets {
   display: block !important;
+  /* back on the page for printing */
+  position: static;
+  left: auto;
+  top: auto;
+  width: auto;
+  z-index: auto;
   /* 100%, not auto: .sheet is height:100% and needs this link in the chain.
      Setting auto here collapsed every sheet and printed one blank page. */
   height: 100%;
