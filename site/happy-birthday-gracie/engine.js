@@ -363,6 +363,23 @@
         while (inner.scrollHeight > inner.clientHeight + 1 && inner.children.length > 1) {
           ni.insertBefore(inner.lastChild, ni.firstChild);
         }
+        // A single paragraph can be taller than a whole page. When that is all
+        // that is left, break inside it and carry the tail words over.
+        if (inner.scrollHeight > inner.clientHeight + 1 && inner.children.length === 1) {
+          var block = inner.firstChild;
+          var lastP = block.lastElementChild || block;
+          if (lastP && lastP.childNodes.length > 1) {
+            var carry = document.createElement(lastP.tagName || "p");
+            carry.className = lastP.className;
+            while (inner.scrollHeight > inner.clientHeight + 1 &&
+                   lastP.childNodes.length > 1) {
+              carry.insertBefore(lastP.lastChild, carry.firstChild);
+            }
+            var holder = div(block.className);
+            holder.appendChild(carry);
+            ni.insertBefore(holder, ni.firstChild);
+          }
+        }
         var nw = div("page-wrap");
         nw.appendChild(next);
         el.pages.insertBefore(nw, wrap.nextSibling);
