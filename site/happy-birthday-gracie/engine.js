@@ -77,6 +77,7 @@
       el.art.hidden = true;
     }
 
+    el.text.classList.toggle("is-heading", !!node.heading);
     paragraphs(el.text, text);
 
     el.choices.innerHTML = "";

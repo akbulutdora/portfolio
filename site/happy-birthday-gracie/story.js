@@ -54,7 +54,18 @@ const STORY = {
       "you've been with me on happy days, on important days, on difficult days. i really appreciate it. it was such a pain not to be with you on your birthday.\n\n" +
       "so to be able to celebrate with you, i made little silly stories of us celebrating your birthday.",
     choices: [
-      { label: "let's go!", to: "scene1" },
+      { label: "let's go!", to: "title" },
+    ],
+  },
+
+  /* The title page. It carries the same drawing and the same words as the
+     booklet cover, so both come from UI and can never drift apart. */
+  title: {
+    art: UI.coverArt,
+    text: UI.coverTitle,
+    heading: true,
+    choices: [
+      { label: "begin", to: "scene1" },
     ],
   },
 
