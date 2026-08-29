@@ -274,7 +274,7 @@ body.reading .card { display: none; }
   padding-top: 20px;
   border-top: 1px solid var(--rule);
 }
-.poem__lines { margin-bottom: 20px; }
+.poem__lines { margin-top: 20px; }
 .poem__line {
   padding: 6px 0;
   color: color-mix(in srgb, var(--fg) 42%, transparent);
@@ -291,7 +291,7 @@ body.reading .card { display: none; }
 .hw__w {
   display: inline-block;
   width: var(--w);
-  height: var(--hw-h, 34px);
+  height: var(--hw-h, 46px);
   vertical-align: baseline;
   background-color: currentColor;
   -webkit-mask: var(--m) no-repeat center / contain;
