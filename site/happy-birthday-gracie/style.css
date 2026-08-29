@@ -269,11 +269,7 @@ body.reading .card { display: none; }
 }
 
 /* ---- the poem, read aloud ------------------------------------------- */
-.poem {
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid var(--rule);
-}
+.poem { margin-top: 34px; }
 .poem__lines { margin-top: 20px; }
 .poem__line {
   padding: 6px 0;
@@ -290,11 +286,18 @@ body.reading .card { display: none; }
    single browser space between them sits tighter than the hand did. One extra
    space of width puts the rhythm back. */
 #text p, .poem__line, .tail { word-spacing: 0.30em; }
+#text p + p { margin-top: 42px; }
+.page__text p + p { margin-top: 30px; }
+.page__tail { margin-top: 22px; }
 
 /* One word of the handwriting. The PNG is an alpha mask, not a picture of ink,
    so the colour comes from the text colour and one file serves every context. */
 .hw__w {
   display: inline-block;
+  /* the ink is a background colour, which browsers drop when printing unless
+     they are told not to; without this the booklet prints blank */
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
   width: var(--w);
   height: var(--hw-h, 46px);
   vertical-align: baseline;

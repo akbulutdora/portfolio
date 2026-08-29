@@ -76,6 +76,8 @@ const STORY = {
     art: UI.coverArt,
     text: UI.coverTitle,
     heading: true,
+    // the booklet cover already carries this, so it is not printed twice
+    noPrint: true,
     choices: [
       { label: "begin", to: "scene1" },
     ],

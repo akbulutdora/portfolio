@@ -80,8 +80,9 @@
     }
 
     renderAudio(node.audio);
-    el.tail.innerHTML = node.tail || "";
-    el.tail.hidden = !node.tail;
+    var tail = val(node.tail) || "";
+    el.tail.innerHTML = tail;
+    el.tail.hidden = !tail;
     el.text.classList.toggle("is-heading", !!node.heading);
     el.card.classList.toggle("card--title", !!node.heading);
     el.card.classList.toggle("card--flow", !!node.flow);
@@ -120,7 +121,7 @@
     el.card.classList.add("is-fading");
     if (el.body) el.body.scrollTop = 0;
 
-    return { art: art, text: text };
+    return { art: art, text: text, tail: tail };
   }
 
   /* ---- the poem, read aloud ----------------------------------------- */
@@ -201,14 +202,14 @@
     if (!STORY[id]) { fail("This path leads to a node that does not exist: " + id); return; }
     current = id;
     var r = render(id);
-    trail.push({ id: id, art: r.art, text: r.text, choice: null, probes: [] });
+    trail.push({ id: id, art: r.art, text: r.text, tail: r.tail, choice: null, probes: [] });
     save();
   }
 
   function refresh() {                 // same node, flags changed
     var r = render(current);
     var t = trail[trail.length - 1];
-    t.art = r.art; t.text = r.text;
+    t.art = r.art; t.text = r.text; t.tail = r.tail;
     save();
   }
 
@@ -292,13 +293,8 @@
     return p;
   }
 
-  function sceneLeaf(t, i) {
+  function sceneLeaf(t) {
     var p = div("page");
-
-    var n = div("page__num");
-    n.textContent = String(i + 1);
-    p.appendChild(n);
-
     var inner = div("page__inner");
 
     if (t.art && !badArt[t.art]) {
@@ -313,6 +309,12 @@
     paragraphs(body, t.text);
     inner.appendChild(body);
 
+    if (t.tail) {
+      var tl = div("page__tail");
+      tl.innerHTML = t.tail;
+      inner.appendChild(tl);
+    }
+
     if (t.choice) {
       var ch = document.createElement("p");
       ch.className = "page__choice";
@@ -324,40 +326,95 @@
     return p;
   }
 
-  function buildBooklet() {
-    var leaves = [coverLeaf()];
-    trail.forEach(function (t, i) { leaves.push(sceneLeaf(t, i)); });
+  /* Build in three passes. The pages have to exist and be visible before the
+     browser can say whether anything overflows, and the handwritten letter runs
+     far past one A5 page, so it is split only after it has been measured. */
 
-    // screen: the cover on its own, then two pages to a row, as it folds
+  function buildLeaves() {
     el.pages.innerHTML = "";
-    var groups = [[leaves[0]]];
-    for (var i = 1; i < leaves.length; i += 2) groups.push(leaves.slice(i, i + 2));
+    el.sheets.innerHTML = "";
+    var leaves = [coverLeaf()];
+    trail.forEach(function (t) {
+      var node = STORY[t.id];
+      if (node && node.noPrint) return;     // the cover already carries it
+      leaves.push(sceneLeaf(t));
+    });
+    leaves.forEach(function (leaf) {
+      var wrap = div("page-wrap");
+      wrap.appendChild(leaf);
+      el.pages.appendChild(wrap);
+    });
+  }
+
+  // Move trailing blocks onto a fresh page until what is left fits. The art
+  // stays on the first page of a scene and the choice ends up on the last,
+  // because both ride along with the blocks around them.
+  function splitLongPages() {
+    var wraps = [].slice.call(el.pages.children);
+    var guard = 0;
+    wraps.forEach(function (wrap) {
+      var page = wrap.firstChild;
+      var inner = page.querySelector(".page__inner");
+      while (inner && inner.scrollHeight > inner.clientHeight + 1 &&
+             inner.children.length > 1 && guard++ < 400) {
+        var next = div("page");
+        var ni = div("page__inner");
+        next.appendChild(ni);
+        while (inner.scrollHeight > inner.clientHeight + 1 && inner.children.length > 1) {
+          ni.insertBefore(inner.lastChild, ni.firstChild);
+        }
+        var nw = div("page-wrap");
+        nw.appendChild(next);
+        el.pages.insertBefore(nw, wrap.nextSibling);
+        wrap = nw; page = next; inner = ni;
+      }
+    });
+  }
+
+  function numberPages() {
+    var n = 0;
+    [].forEach.call(el.pages.querySelectorAll(".page"), function (pg) {
+      if (pg.classList.contains("page--cover")) return;
+      n += 1;
+      var old = pg.querySelector(".page__num");
+      if (old) old.remove();
+      var d = div("page__num");
+      d.textContent = String(n);
+      pg.insertBefore(d, pg.firstChild);
+    });
+  }
+
+  // the cover alone, then two pages to a row, as the sheet folds
+  function groupSpreads() {
+    var pages = [].map.call(el.pages.querySelectorAll(".page"), function (p) { return p; });
+    el.pages.innerHTML = "";
+    var groups = [[pages[0]]];
+    for (var i = 1; i < pages.length; i += 2) groups.push(pages.slice(i, i + 2));
     groups.forEach(function (group) {
       var sp = div("spread" + (group.length === 1 ? " spread--single" : ""));
-      group.forEach(function (leaf) {
+      group.forEach(function (pg) {
         var wrap = div("page-wrap");
-        wrap.appendChild(leaf);
+        wrap.appendChild(pg);
         sp.appendChild(wrap);
       });
       el.pages.appendChild(sp);
     });
+    return pages;
+  }
 
-    // print: imposed A4 sheets
+  function buildSheets(pages) {
     el.sheets.innerHTML = "";
-    impose(leaves.length).forEach(function (pair, side) {
+    impose(pages.length).forEach(function (pair, side) {
       var sheet = div("sheet" + (side % 2 ? " sheet--back" : " sheet--front"));
       var rot = div("sheet__rot");   // print.css turns this sideways on the paper
       pair.forEach(function (n, k) {
         var half = div("half half--" + (k === 0 ? "left" : "right"));
-        if (n) half.appendChild(leaves[n - 1].cloneNode(true));
+        if (n) half.appendChild(pages[n - 1].cloneNode(true));
         rot.appendChild(half);
       });
       sheet.appendChild(rot);
       el.sheets.appendChild(sheet);
     });
-
-    fitPreview();
-    flagOverflow();
   }
 
   // scale the true-size A5 preview down to the column width
@@ -377,12 +434,19 @@
   }
 
   function openBooklet() {
-    buildBooklet();
     el.booklet.hidden = false;
     document.body.classList.add("reading");
     el.booklet.scrollTop = 0;
     window.scrollTo(0, 0);
-    requestAnimationFrame(function () { fitPreview(); flagOverflow(); });
+    buildLeaves();
+    // measure only once the pages are on screen and their art has settled
+    requestAnimationFrame(function () {
+      splitLongPages();
+      numberPages();
+      buildSheets(groupSpreads());
+      fitPreview();
+      flagOverflow();
+    });
   }
 
   function closeBooklet() {
