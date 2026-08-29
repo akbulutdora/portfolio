@@ -655,8 +655,9 @@
   $("bk-restart").addEventListener("click", restart);
 
   // Recovery with no interface: thoughtassault.dev/happy-birthday-gracie/?flip=1
-  // turns every back sheet 180 degrees, for a printer that flips the other way.
-  if (/[?&]flip=1/.test(location.search)) document.body.classList.add("flip-long");
+  // turns every back sheet 180 degrees, for a printer set to turn the paper
+  // around its short edge. The default suits the long edge, like a book page.
+  if (/[?&]flip=1/.test(location.search)) document.body.classList.add("flip-short");
 
   /* ---- authoring check ---------------------------------------------- */
   /* Runs on every load and only writes to the console. Gracie never sees it. */

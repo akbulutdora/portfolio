@@ -78,7 +78,11 @@ body {
   align-self: center;
   width: calc(var(--art-w) * var(--art-scale));
   height: calc(var(--art-h) * var(--art-scale));
-  max-width: 100%;
+  /* the picture's box, with the border outside it: under border-box the 1px
+     border came out of the width, the picture drew at 1.987x, and pixelated
+     rendering put one source column and one row at a single screen px */
+  box-sizing: content-box;
+  max-width: calc(100% - 2px);
   border: 1px solid var(--rule);
 }
 /* contain, not stretch: the story scenes match the pane exactly, but the cover

@@ -74,10 +74,17 @@ html, body, .booklet, .sheets {
   transform-origin: top left;
 }
 
-/* some drivers flip the back the other way; the checkbox turns this on.
-   270 degrees is the same placement as 90, with the content upside down. */
-body.flip-long .sheet--back .sheet__rot {
+/* The back of each sheet turns the other way, so that a printer which turns
+   the paper like a book page, around its long edge, puts page 2 behind the
+   cover. That is the default two-sided setting on macOS, iPhone, and Windows.
+   270 degrees is the same placement as 90 with the content upside down.
+   ?flip=1 undoes it, for a printer set to turn the paper around its short
+   edge, like a notepad. tools/check-fold.py walks a printed PDF both ways. */
+.sheet--back .sheet__rot {
   transform: rotate(270deg) translate(-100%, 0);
+}
+body.flip-short .sheet--back .sheet__rot {
+  transform: rotate(90deg) translate(0, -100%);
 }
 
 .half {
