@@ -12,7 +12,7 @@ const PAGES = {
     "hw/pages/letter-07.png?v=82f999f2ad",
     "hw/pages/letter-08.png?v=53683a7d7e",
   ],
-  // hash of letter.js, story.js, style.css, fonts.css, engine.js at render time;
+  // hash of letter.js, poem.js, story.js, style.css, fonts.css, engine.js at render time;
   // deploy.sh renders again when it no longer matches
-  layoutHash: "5c0444eaec",
+  layoutHash: "866c41c6ab",
 };

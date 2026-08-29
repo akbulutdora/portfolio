@@ -65,7 +65,7 @@
 
   function paragraphs(into, str) {
     into.innerHTML = "";
-    String(str).split(/\n\s*\n/).forEach(function (chunk) {
+    String(str == null ? "" : str).split(/\n\s*\n/).forEach(function (chunk) {
       var t = chunk.trim();
       if (!t) return;
       var p = document.createElement("p");
@@ -235,7 +235,7 @@
     if (c.set) Object.assign(state, c.set);
     if (!trail.length) trail.push({ id: current, art: null, text: "", choice: null, probes: [] });
     var here = trail[trail.length - 1];
-    if (c.stay) { here.probes.push(val(c.label)); refresh(); return; }
+    if (c.stay) { (here.probes = here.probes || []).push(val(c.label)); refresh(); return; }
     here.choice = val(c.label);
     go(val(c.to));
   }
@@ -267,7 +267,12 @@
 
   function restart() {
     try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+    // the recording keeps its place across nodes; a fresh start begins at 0
+    el.audio.pause();
+    try { el.audio.currentTime = 0; } catch (e) {}
+    el.seek.value = 0;
     state = {}; trail = []; closeBooklet(); go(START);
+    paintLine();
   }
 
   /* ---- booklet ----------------------------------------------------- */
@@ -617,6 +622,7 @@
   // phone the dialog could open before any had arrived and the pages came out
   // blank. Ten seconds is a ceiling, not a wait: it prints as soon as they land.
   $("bk-print").addEventListener("click", function () {
+    if (this.classList.contains("is-waiting")) return;   // one print per tap
     var imgs = [].slice.call(el.sheets.querySelectorAll("img"));
     // decode() forces the pixels to be ready whatever the element's visibility.
     // Waiting on load alone was not enough: the file had arrived but WebKit had
@@ -624,9 +630,12 @@
     if (imgs.length && imgs[0].decode) {
       var btnD = this;
       btnD.classList.add("is-waiting");
-      Promise.all(imgs.map(function (i) {
+      var ready = Promise.all(imgs.map(function (i) {
         return i.decode ? i.decode().catch(function () {}) : null;
-      })).then(function () {
+      }));
+      // a picture that never arrives must not hold the button forever
+      var ceiling = new Promise(function (ok) { setTimeout(ok, 10000); });
+      Promise.race([ready, ceiling]).then(function () {
         btnD.classList.remove("is-waiting");
         window.print();
       });
@@ -670,7 +679,7 @@
     ids.forEach(function (id) {
       var n = STORY[id], cs = n.choices || [];
       if (!cs.length && !n.end) bad.push(id + ": no choices and no end:true, so the reader gets stuck here");
-      if (!n.art && typeof n.text === "string" && !n.text.trim()) bad.push(id + ": no text and no art, so the card renders empty");
+      if (!n.art && (n.text == null || (typeof n.text === "string" && !n.text.trim()))) bad.push(id + ": no text and no art, so the card renders empty");
       cs.forEach(function (c, i) {
         var at = id + " choice " + i;
         if (!c.label) bad.push(at + ": no label");
