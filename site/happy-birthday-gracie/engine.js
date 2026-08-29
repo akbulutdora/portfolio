@@ -28,7 +28,22 @@
   el.img.addEventListener("error", function () {
     badArt[el.img.getAttribute("src")] = true;
     el.art.classList.add("art--missing");
+    el.art.style.removeProperty("--art-w");   // the dashed box keeps the :root size
+    el.art.style.removeProperty("--art-h");
   });
+
+  // Size the pane to the picture, not the other way round. The scenes are
+  // 156x128 and the cover is 160x144; one fixed pane letterboxed the cover 14px
+  // a side and drew it at 1.78x, and pixelated rendering at a fraction makes
+  // some source pixels 1 screen px and some 2. Set on the element, the two
+  // properties beat the :root values for this pane only, and the pane is
+  // always the picture times --art-scale.
+  function fitArt() {
+    if (!el.img.naturalWidth) return;
+    el.art.style.setProperty("--art-w", el.img.naturalWidth + "px");
+    el.art.style.setProperty("--art-h", el.img.naturalHeight + "px");
+  }
+  el.img.addEventListener("load", fitArt);
 
   // Clones lose their listeners, so catch image errors on the way down instead.
   ["pages", "sheets"].forEach(function (k) {
@@ -74,6 +89,7 @@
       el.art.hidden = false;
       el.art.classList.toggle("art--missing", !!badArt[art]);
       if (el.img.getAttribute("src") !== art) el.img.src = art;
+      fitArt();                        // same src again: load does not fire
       el.img.alt = val(node.alt) || "";
     } else {
       el.art.hidden = true;
