@@ -121,7 +121,9 @@
     el.card.classList.add("is-fading");
     if (el.body) el.body.scrollTop = 0;
 
-    return { art: art, text: text, tail: tail };
+    // the poem's lines go into the trail too, so the booklet prints them
+    var poem = ((node.audio && node.audio.lines) || []).map(function (l) { return l.html || ""; });
+    return { art: art, text: text, tail: tail, poem: poem };
   }
 
   /* ---- the poem, read aloud ----------------------------------------- */
@@ -202,14 +204,14 @@
     if (!STORY[id]) { fail("This path leads to a node that does not exist: " + id); return; }
     current = id;
     var r = render(id);
-    trail.push({ id: id, art: r.art, text: r.text, tail: r.tail, choice: null, probes: [] });
+    trail.push({ id: id, art: r.art, text: r.text, tail: r.tail, poem: r.poem, choice: null, probes: [] });
     save();
   }
 
   function refresh() {                 // same node, flags changed
     var r = render(current);
     var t = trail[trail.length - 1];
-    t.art = r.art; t.text = r.text; t.tail = r.tail;
+    t.art = r.art; t.text = r.text; t.tail = r.tail; t.poem = r.poem;
     save();
   }
 
@@ -293,8 +295,19 @@
     return p;
   }
 
-  function sceneLeaf(t) {
+  // Every page but the cover carries a number. A placeholder holds its height
+  // from the start, so the split below measures the room that is really there:
+  // numbered afterwards, pages passed at up to 36px taller than they print.
+  function pageShell() {
     var p = div("page");
+    var n = div("page__num");
+    n.textContent = "0";
+    p.appendChild(n);
+    return p;
+  }
+
+  function sceneLeaf(t) {
+    var p = pageShell();
     var inner = div("page__inner");
 
     if (t.art && !badArt[t.art]) {
@@ -308,6 +321,18 @@
     var body = div("page__text");
     paragraphs(body, t.text);
     inner.appendChild(body);
+
+    // the poem, one handwritten line each, between the letter and the sign-off
+    // as it sits on the paper
+    if (t.poem && t.poem.length) {
+      var pm = div("page__poem");
+      t.poem.forEach(function (h) {
+        var ln = div("page__line");
+        ln.innerHTML = h;
+        pm.appendChild(ln);
+      });
+      inner.appendChild(pm);
+    }
 
     if (t.tail) {
       var tl = div("page__tail");
@@ -329,7 +354,7 @@
   // One letter page, drawn beforehand as a picture (tools/render-pages.mjs).
   // It fills the inner box it was cut from, under the page number.
   function rasterLeaf(src) {
-    var p = div("page");
+    var p = pageShell();
     var inner = div("page__inner");
     var im = document.createElement("img");
     im.className = "page__raster";
@@ -404,6 +429,7 @@
           id: t.id,
           art: k === 0 ? t.art : null,
           text: slice.join("\n\n"),
+          poem: k === out.length - 1 ? t.poem : null,
           tail: k === out.length - 1 ? t.tail : null,
           choice: k === out.length - 1 ? t.choice : null,
           probes: [],
@@ -430,7 +456,7 @@
       var over = function () { return inner.scrollHeight > inner.clientHeight + 1; };
 
       while (over() && guard++ < 400) {
-        var next = div("page");
+        var next = pageShell();
         var ni = div("page__inner");
         next.appendChild(ni);
 

@@ -309,9 +309,16 @@ body.reading .card { display: none; }
    single browser space between them sits tighter than the hand did. One extra
    space of width puts the rhythm back. */
 #text p, .poem__line, .tail { word-spacing: 0.30em; }
+.page__text p, .page__line, .page__tail { word-spacing: 0.30em; }
 #text p + p { margin-top: 42px; }
 .page__text p + p { margin-top: 30px; }
 .page__tail { margin-top: 22px; }
+/* The poem on the page. line-height 0 drops the descender slack under each
+   46px band, so a line is 48px, against 52px for a letter line: close enough
+   to match, and tight enough that the poem and the sign-off share one A5 page
+   (11 lines + sign-off + choice = 649px of 663). */
+.page__poem { margin-top: 16px; }
+.page__line { line-height: 0; padding: 1px 0; }
 
 /* One word of the handwriting. The PNG is an alpha mask, not a picture of ink,
    so the colour comes from the text colour and one file serves every context. */
