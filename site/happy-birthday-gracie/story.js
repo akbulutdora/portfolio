@@ -63,7 +63,7 @@ const STORY = {
     // handwriting from page 2 is extracted and mapped to the word timings in
     // content/audio/poem-timings.json.
     audio: {
-      src: "audio/poem.m4a?v=27c1269209",
+      src: "audio/poem.m4a?v=1e8ebec043",
       lines: [],
     },
     choices: [
