@@ -335,9 +335,27 @@
     el.sheets.innerHTML = "";
     var leaves = [coverLeaf()];
     trail.forEach(function (t) {
-      var node = STORY[t.id];
-      if (node && node.noPrint) return;     // the cover already carries it
-      leaves.push(sceneLeaf(t));
+      var node = STORY[t.id] || {};
+      if (node.noPrint) return;             // the cover already carries it
+      var breaks = node.bookletBreaks;
+      if (!breaks || !breaks.length) { leaves.push(sceneLeaf(t)); return; }
+
+      // Dora chooses where this node's writing breaks across booklet pages,
+      // because the handwriting has to stay legible and cannot be shrunk to fit.
+      var paras = String(t.text).split(/\n\s*\n/);
+      var cuts = [0].concat(breaks.map(function (b) { return b - 1; }), [paras.length]);
+      for (var k = 0; k < cuts.length - 1; k++) {
+        var slice = paras.slice(cuts[k], cuts[k + 1]);
+        if (!slice.length) continue;
+        leaves.push(sceneLeaf({
+          id: t.id,
+          art: k === 0 ? t.art : null,
+          text: slice.join("\n\n"),
+          tail: k === cuts.length - 2 ? t.tail : null,
+          choice: k === cuts.length - 2 ? t.choice : null,
+          probes: [],
+        }));
+      }
     });
     leaves.forEach(function (leaf) {
       var wrap = div("page-wrap");

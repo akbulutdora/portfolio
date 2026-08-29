@@ -289,10 +289,6 @@ body.reading .card { display: none; }
 #text p + p { margin-top: 42px; }
 .page__text p + p { margin-top: 30px; }
 .page__tail { margin-top: 22px; }
-/* The handwriting is sized for the screen. On an A5 booklet page it has to be
-   smaller, and zoom scales the inline widths with it, which transform would not. */
-.page .page__text, .page .page__tail { zoom: 0.46; }
-.page .page__text p + p { margin-top: 26px; }
 
 /* One word of the handwriting. The PNG is an alpha mask, not a picture of ink,
    so the colour comes from the text colour and one file serves every context. */
