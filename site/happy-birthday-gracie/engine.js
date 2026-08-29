@@ -545,7 +545,31 @@
 
   /* ---- boot -------------------------------------------------------- */
 
-  $("bk-print").addEventListener("click", function () { window.print(); });
+  // Wait for the print images before opening the print sheet. There are over
+  // 500 of them and they only start loading when the booklet is built, so on a
+  // phone the dialog could open before any had arrived and the pages came out
+  // blank. Ten seconds is a ceiling, not a wait: it prints as soon as they land.
+  $("bk-print").addEventListener("click", function () {
+    var imgs = [].slice.call(el.sheets.querySelectorAll("img"));
+    var pending = imgs.filter(function (i) { return !i.complete; });
+    if (!pending.length) { window.print(); return; }
+
+    var btn = this;
+    btn.classList.add("is-waiting");
+    var left = pending.length, done = false;
+    function finish() {
+      if (done) return;
+      done = true;
+      btn.classList.remove("is-waiting");
+      window.print();
+    }
+    pending.forEach(function (i) {
+      var tick = function () { if (--left <= 0) finish(); };
+      i.addEventListener("load", tick, { once: true });
+      i.addEventListener("error", tick, { once: true });
+    });
+    setTimeout(finish, 10000);
+  });
   window.addEventListener("resize", function () { fitPreview(); flagOverflow(); });
   $("bk-restart").addEventListener("click", restart);
 
