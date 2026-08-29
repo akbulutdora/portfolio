@@ -195,7 +195,16 @@ body.reading .card { display: none; }
 .booklet__bar button.is-waiting { opacity: 0.5; }
 
 
-.sheets { display: none; }          /* print only */
+/* Print-only, but NOT display:none. WebKit never decodes images inside a hidden
+   subtree, so at print time the word images had nothing to paint and the letter
+   came out blank: his phone's PDF held 8 images where it should hold 990. Laid
+   out with zero height and clipped instead, so the images decode while nothing
+   shows and the page does not grow. */
+.sheets {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
 
 .pages {
   --preview-scale: 1;

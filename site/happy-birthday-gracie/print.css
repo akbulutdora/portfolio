@@ -32,7 +32,12 @@ html, body, .booklet, .sheets {
 }
 .booklet[hidden] { display: none !important; }
 
-.sheets { display: block !important; }
+.sheets {
+  display: block !important;
+  height: auto;
+  overflow: visible;
+  visibility: visible;
+}
 
 /* Sized in percent, not millimetres: whatever paper is loaded, the sheet fills it
    and the fold stays in the middle. A4 and US Letter both work. */
