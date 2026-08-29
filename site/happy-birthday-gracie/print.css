@@ -106,6 +106,15 @@ body.flip-long .sheet--back .sheet__rot {
 .say--g { color: #a3341c; }
 .say--d { color: #1740b8; }
 
+/* the handwriting, as real images rather than masked spans */
+.hw__p {
+  display: inline-block;
+  height: 46px;
+  vertical-align: baseline;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
 .page__num   { opacity: 1; color: #6b6257; }
 .page__sub   { opacity: 1; color: #6b6257; }
 .page__choice { opacity: 1; }

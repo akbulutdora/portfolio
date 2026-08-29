@@ -472,6 +472,25 @@
     return pages;
   }
 
+  // On paper the masked spans came out as solid black blocks: WebKit does not
+  // apply a CSS mask when printing, so each span painted its whole background.
+  // The sheets use real images instead, in dark ink, which every engine prints.
+  // They are built only when she binds the booklet, so nobody downloads them
+  // just to read the story.
+  function forPrint(node) {
+    [].forEach.call(node.querySelectorAll(".hw__w"), function (span) {
+      var m = /url\(([^)]+)\)/.exec(span.style.getPropertyValue("--m") || "");
+      if (!m) return;
+      var im = document.createElement("img");
+      im.className = "hw__p";
+      im.alt = "";
+      im.src = m[1].replace(/^hw\//, "hw/dark/");
+      im.style.width = span.style.getPropertyValue("--w");
+      span.parentNode.replaceChild(im, span);
+    });
+    return node;
+  }
+
   function buildSheets(pages) {
     el.sheets.innerHTML = "";
     impose(pages.length).forEach(function (pair, side) {
@@ -479,7 +498,7 @@
       var rot = div("sheet__rot");   // print.css turns this sideways on the paper
       pair.forEach(function (n, k) {
         var half = div("half half--" + (k === 0 ? "left" : "right"));
-        if (n) half.appendChild(pages[n - 1].cloneNode(true));
+        if (n) half.appendChild(forPrint(pages[n - 1].cloneNode(true)));
         rot.appendChild(half);
       });
       sheet.appendChild(rot);
