@@ -286,6 +286,11 @@ body.reading .card { display: none; }
 /* the sign-off, which sits after the poem as it does on the paper */
 .tail { margin-top: 26px; }
 
+/* Cutting the words out one by one throws the original spacing away, and a
+   single browser space between them sits tighter than the hand did. One extra
+   space of width puts the rhythm back. */
+#text p, .poem__line, .tail { word-spacing: 0.30em; }
+
 /* One word of the handwriting. The PNG is an alpha mask, not a picture of ink,
    so the colour comes from the text colour and one file serves every context. */
 .hw__w {
