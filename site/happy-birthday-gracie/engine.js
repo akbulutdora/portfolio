@@ -342,20 +342,48 @@
 
       // Dora chooses where this node's writing breaks across booklet pages,
       // because the handwriting has to stay legible and cannot be shrunk to fit.
+      // A break is either a paragraph number, or [paragraph, word] to cut inside
+      // one. The letter has a paragraph taller than a whole page, so cutting
+      // only between paragraphs cannot work, and shrinking the hand is not on.
       var paras = String(t.text).split(/\n\s*\n/);
-      var cuts = [0].concat(breaks.map(function (b) { return b - 1; }), [paras.length]);
-      for (var k = 0; k < cuts.length - 1; k++) {
-        var slice = paras.slice(cuts[k], cuts[k + 1]);
-        if (!slice.length) continue;
+      var probe = document.createElement("div");
+      var startsAt = {}, insideAt = {};
+      breaks.forEach(function (b) {
+        if (Array.isArray(b)) {
+          var pi = b[0] - 1;
+          (insideAt[pi] = insideAt[pi] || []).push(b[1]);
+        } else {
+          startsAt[b - 1] = true;
+        }
+      });
+
+      var out = [], group = [];
+      paras.forEach(function (para, pi) {
+        if (pi && startsAt[pi] && group.length) { out.push(group); group = []; }
+        var cuts = (insideAt[pi] || []).slice().sort(function (x, y) { return x - y; });
+        if (!cuts.length) { group.push(para); return; }
+        probe.innerHTML = para;
+        var ws = [].slice.call(probe.children);
+        var from = 0;
+        cuts.concat([ws.length]).forEach(function (to, k) {
+          var part = ws.slice(from, to).map(function (n) { return n.outerHTML; }).join(" ");
+          if (k > 0 && group.length) { out.push(group); group = []; }
+          if (part) group.push(part);
+          from = to;
+        });
+      });
+      if (group.length) out.push(group);
+
+      out.forEach(function (slice, k) {
         leaves.push(sceneLeaf({
           id: t.id,
           art: k === 0 ? t.art : null,
           text: slice.join("\n\n"),
-          tail: k === cuts.length - 2 ? t.tail : null,
-          choice: k === cuts.length - 2 ? t.choice : null,
+          tail: k === out.length - 1 ? t.tail : null,
+          choice: k === out.length - 1 ? t.choice : null,
           probes: [],
         }));
-      }
+      });
     });
     leaves.forEach(function (leaf) {
       var wrap = div("page-wrap");
