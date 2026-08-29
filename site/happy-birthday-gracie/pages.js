@@ -14,5 +14,5 @@ const PAGES = {
   ],
   // hash of letter.js, poem.js, story.js, style.css, fonts.css, engine.js at render time;
   // deploy.sh renders again when it no longer matches
-  layoutHash: "866c41c6ab",
+  layoutHash: "3f9eb4cce1",
 };

@@ -660,6 +660,12 @@
     });
     setTimeout(finish, 10000);
   });
+  // Opened from the home screen, iOS shows no print dialog and window.print()
+  // does nothing, so the button would be dead. The booklet still previews; the
+  // PDF is made from the browser.
+  var standalone = navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  if (standalone) $("bk-print").hidden = true;
   window.addEventListener("resize", function () { fitPreview(); flagOverflow(); });
   $("bk-restart").addEventListener("click", restart);
 
