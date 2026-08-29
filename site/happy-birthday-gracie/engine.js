@@ -15,6 +15,8 @@
     body: document.querySelector(".body"),
     text: $("text"), choices: $("choices"),
     booklet: $("booklet"), pages: $("pages"), sheets: $("sheets"),
+    poem: $("poem"), poemLines: $("poem-lines"),
+    audio: $("pl-audio"), toggle: $("pl-toggle"), seek: $("pl-seek"),
   };
 
   function val(x) { return typeof x === "function" ? x(state) : x; }
@@ -77,6 +79,7 @@
       el.art.hidden = true;
     }
 
+    renderAudio(node.audio);
     el.text.classList.toggle("is-heading", !!node.heading);
     el.card.classList.toggle("card--title", !!node.heading);
     paragraphs(el.text, text);
@@ -116,6 +119,78 @@
 
     return { art: art, text: text };
   }
+
+  /* ---- the poem, read aloud ----------------------------------------- */
+  /* One entry per handwritten line, each with the second it begins. The line
+     whose turn it is lights up. Before the first line's time nothing is lit:
+     the recording opens with silence and that silence is part of the reading. */
+
+  var poemLines = [];
+
+  function renderAudio(spec) {
+    if (!spec || !spec.src) {
+      el.poem.hidden = true;
+      poemLines = [];
+      if (!el.audio.paused) el.audio.pause();
+      return;
+    }
+    if (el.audio.getAttribute("src") !== spec.src) {
+      el.audio.pause();
+      el.audio.setAttribute("src", spec.src);
+      el.seek.value = 0;
+    }
+    poemLines = spec.lines || [];
+    el.poemLines.innerHTML = "";
+    poemLines.forEach(function (ln, i) {
+      var d = div("poem__line");
+      d.dataset.i = String(i);
+      d.innerHTML = ln.html || "";
+      el.poemLines.appendChild(d);
+    });
+    el.poemLines.hidden = poemLines.length === 0;
+    el.poem.hidden = false;
+  }
+
+  function lineAt(t) {
+    var found = -1;
+    for (var i = 0; i < poemLines.length; i++) {
+      if (t >= poemLines[i].at) found = i; else break;
+    }
+    return found;
+  }
+
+  function paintLine() {
+    var now = lineAt(el.audio.currentTime);
+    var all = el.poemLines.children;
+    for (var i = 0; i < all.length; i++) {
+      all[i].classList.toggle("is-now", i === now);
+    }
+  }
+
+  el.toggle.addEventListener("click", function () {
+    if (el.audio.paused) el.audio.play(); else el.audio.pause();
+  });
+  el.audio.addEventListener("play", function () {
+    el.toggle.classList.add("is-playing");
+    el.toggle.setAttribute("aria-label", "pause");
+  });
+  el.audio.addEventListener("pause", function () {
+    el.toggle.classList.remove("is-playing");
+    el.toggle.setAttribute("aria-label", "play");
+  });
+  el.audio.addEventListener("timeupdate", function () {
+    if (el.audio.duration) {
+      el.seek.value = String(Math.round(el.audio.currentTime / el.audio.duration * 1000));
+    }
+    paintLine();
+  });
+  el.audio.addEventListener("ended", function () { paintLine(); });
+  el.seek.addEventListener("input", function () {
+    if (el.audio.duration) {
+      el.audio.currentTime = el.seek.value / 1000 * el.audio.duration;
+      paintLine();
+    }
+  });
 
   /* ---- moving ------------------------------------------------------ */
 

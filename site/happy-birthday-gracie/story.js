@@ -10,6 +10,12 @@
                                                       orange, one starting with
                                                       "dory" in his blue.
      end      true on the last node                  optional
+     heading  true renders the text as a title       optional
+     audio    { src, lines } puts a player under the text        optional
+                lines: one entry per handwritten line of the poem,
+                  { at: seconds, html: "<span class=\"hw__w\" ...></span> ..." }
+                The line whose turn it is lights up while the audio plays.
+                Empty lines: the player appears with nothing above it.
      choices  array, in the order they appear
 
    A choice:
@@ -53,6 +59,13 @@ const STORY = {
       "i hope you'll have a wonderful day and night. i want to hear all about it when we are ready to hang out again.\n\n" +
       "you've been with me on happy days, on important days, on difficult days. i really appreciate it. it was such a pain not to be with you on your birthday.\n\n" +
       "so to be able to celebrate with you, i made little silly stories of us celebrating your birthday.",
+    // The poem, read aloud, under the letter. lines stays empty until the
+    // handwriting from page 2 is extracted and mapped to the word timings in
+    // content/audio/poem-timings.json.
+    audio: {
+      src: "audio/poem.m4a?v=27c1269209",
+      lines: [],
+    },
     choices: [
       { label: "let's go!", to: "title" },
     ],

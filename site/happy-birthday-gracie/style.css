@@ -263,6 +263,61 @@ body.reading .card { display: none; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+/* ---- the poem, read aloud ------------------------------------------- */
+.poem {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+.poem__lines { margin-bottom: 20px; }
+.poem__line {
+  padding: 5px 0;
+  opacity: 0.40;
+  transition: opacity 180ms ease-out;
+}
+.poem__line.is-now { opacity: 1; }
+
+.player { display: flex; align-items: center; gap: 14px; }
+.player__btn {
+  position: relative;
+  flex: none;
+  width: 44px; height: 44px;
+  border: 1px solid var(--fg);
+  background: transparent;
+  cursor: pointer;
+}
+.player__btn::before {          /* a play triangle, drawn, so it needs no word */
+  content: "";
+  position: absolute; left: 50%; top: 50%;
+  width: 14px; height: 16px;
+  transform: translate(-40%, -50%);
+  background: var(--fg);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.player__btn.is-playing::before {   /* two bars while it plays */
+  width: 12px;
+  clip-path: none;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(to right,
+    var(--fg) 0 4px, transparent 4px 8px, var(--fg) 8px 12px);
+}
+.player__seek {
+  flex: 1;
+  -webkit-appearance: none; appearance: none;
+  height: 2px;
+  background: var(--rule);
+  cursor: pointer;
+}
+.player__seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: var(--fg);
+}
+.player__seek::-moz-range-thumb {
+  width: 15px; height: 15px; border: 0; border-radius: 50%;
+  background: var(--fg);
+}
+
 /* no GIF for this node yet */
 .art--missing { border-style: dashed; }
 .art--missing img { visibility: hidden; }
