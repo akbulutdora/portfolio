@@ -78,6 +78,7 @@
     }
 
     el.text.classList.toggle("is-heading", !!node.heading);
+    el.card.classList.toggle("card--title", !!node.heading);
     paragraphs(el.text, text);
 
     el.choices.innerHTML = "";
