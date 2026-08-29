@@ -274,6 +274,11 @@ body.reading .card { display: none; }
   display: block; width: var(--booklet-art-w); height: auto;
   margin: 0 auto 6mm; image-rendering: pixelated;
 }
+/* one pre-drawn letter page: as wide as the box it was cut from, never taller */
+.page__raster {
+  display: block; width: 100%; height: auto; max-height: 100%;
+  object-fit: contain; object-position: top left;
+}
 .page__text > * + * { margin-top: 10px; }
 .page__choice {
   margin-top: auto; padding-top: 10px;

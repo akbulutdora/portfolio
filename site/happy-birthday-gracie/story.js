@@ -60,6 +60,9 @@ const STORY = {
     // at that paragraph; [paragraph, word] cuts inside one. Paragraph 5 is
     // taller than a whole page on its own, so it has to be cut somewhere.
     bookletBreaks: [3, 4, 5, [5, 78], 6, 7],
+    // Those pages, drawn once as pictures, which is how the print carries them.
+    // tools/render-pages.mjs writes pages.js; deploy.sh runs it when stale.
+    pages: PAGES.letter,
     // The poem, read aloud, under the letter. lines stays empty until the
     // handwriting from page 2 is extracted and mapped to the word timings in
     // content/audio/poem-timings.json.

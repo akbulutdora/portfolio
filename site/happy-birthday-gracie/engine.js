@@ -326,6 +326,20 @@
     return p;
   }
 
+  // One letter page, drawn beforehand as a picture (tools/render-pages.mjs).
+  // It fills the inner box it was cut from, under the page number.
+  function rasterLeaf(src) {
+    var p = div("page");
+    var inner = div("page__inner");
+    var im = document.createElement("img");
+    im.className = "page__raster";
+    im.alt = "";
+    im.src = src;
+    inner.appendChild(im);
+    p.appendChild(inner);
+    return p;
+  }
+
   /* Build in three passes. The pages have to exist and be visible before the
      browser can say whether anything overflows, and the handwritten letter runs
      far past one A5 page, so it is split only after it has been measured. */
@@ -337,6 +351,17 @@
     trail.forEach(function (t) {
       var node = STORY[t.id] || {};
       if (node.noPrint) return;             // the cover already carries it
+
+      // The letter prints as one picture per page, like the story art. As
+      // hundreds of word images it never reached the PDF that iPhone makes,
+      // whatever was done to load or decode them; pictures also shown in the
+      // preview always did. The pictures are drawn from the layout below by
+      // tools/render-pages.mjs, so what follows is what they were cut from.
+      var pages = val(node.pages);
+      if (pages && pages.length) {
+        pages.forEach(function (src) { leaves.push(rasterLeaf(src)); });
+        return;
+      }
       var breaks = node.bookletBreaks;
       if (!breaks || !breaks.length) { leaves.push(sceneLeaf(t)); return; }
 

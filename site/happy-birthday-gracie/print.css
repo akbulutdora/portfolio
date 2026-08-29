@@ -119,6 +119,14 @@ body.flip-long .sheet--back .sheet__rot {
 .say--g { color: #a3341c; }
 .say--d { color: #1740b8; }
 
+/* the letter, one picture per page */
+.page__raster {
+  width: 100%; height: auto; max-height: 100%;
+  object-fit: contain; object-position: top left;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
 /* the handwriting, as real images rather than masked spans */
 .hw__p {
   display: inline-block;
