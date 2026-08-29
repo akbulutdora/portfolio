@@ -87,6 +87,13 @@ body.flip-long .sheet--back .sheet__rot {
   outline: none;
 }
 
+.page__cover-art {
+  width: 90mm;
+  image-rendering: pixelated;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
 .page__art {
   width: var(--booklet-art-w);
   image-rendering: pixelated;

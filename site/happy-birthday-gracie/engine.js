@@ -196,6 +196,13 @@
 
   function coverLeaf() {
     var p = div("page page--cover");
+    if (UI.coverArt) {
+      var im = document.createElement("img");
+      im.className = "page__cover-art";
+      im.alt = "";
+      im.src = UI.coverArt;
+      p.appendChild(im);
+    }
     if (UI.coverTitle) {
       var h = document.createElement("h1");
       h.className = "page__title";

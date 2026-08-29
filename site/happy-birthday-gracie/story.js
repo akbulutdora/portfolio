@@ -33,6 +33,9 @@ const UI = {
   next: "END. go to next story.",
   // printed on the booklet cover; blank prints nothing
   coverTitle: "gracie's birthday adventures with dory!",
+  // the picture on the booklet cover. Not a story node, and not bound by the
+  // 156x128 story canvas: it is sized by width with the height left to follow.
+  coverArt: "art/scene-8-foreheads.png?v=dc02b75cec",
 };
 
 const START = "welcome";
