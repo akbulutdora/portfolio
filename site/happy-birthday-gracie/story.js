@@ -64,8 +64,10 @@ const STORY = {
     // content/audio/poem-timings.json.
     audio: {
       src: "audio/poem.m4a?v=1e8ebec043",
-      lines: [],
+      lines: POEM.lines,
     },
+    // the letter runs long, so the button sits after it rather than pinned
+    flow: true,
     choices: [
       { label: "let's go!", to: "title" },
     ],

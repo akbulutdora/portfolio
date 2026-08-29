@@ -82,6 +82,7 @@
     renderAudio(node.audio);
     el.text.classList.toggle("is-heading", !!node.heading);
     el.card.classList.toggle("card--title", !!node.heading);
+    el.card.classList.toggle("card--flow", !!node.flow);
     paragraphs(el.text, text);
 
     el.choices.innerHTML = "";

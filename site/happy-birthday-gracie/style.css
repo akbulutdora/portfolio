@@ -152,6 +152,11 @@ body {
 /* Centre the drawing and the title as one group. An auto margin above the art
    and below the text splits the free space evenly, while the buttons stay put
    at the bottom of the card. */
+/* A node marked flow: the card grows with its content and the page scrolls, so
+   the buttons sit after the text instead of being pinned to the bottom. */
+.card--flow { height: auto; min-height: 100dvh; }
+.card--flow .body { flex: 0 0 auto; min-height: 0; overflow: visible; }
+
 .card--title .art { margin-top: auto; }
 /* overflow visible, because the title box ends up 2px short of its own text
    through line-height rounding, and an auto overflow drew a scrollbar for it. */
@@ -271,11 +276,24 @@ body.reading .card { display: none; }
 }
 .poem__lines { margin-bottom: 20px; }
 .poem__line {
-  padding: 5px 0;
-  opacity: 0.40;
-  transition: opacity 180ms ease-out;
+  padding: 6px 0;
+  color: color-mix(in srgb, var(--fg) 42%, transparent);
+  transition: color 180ms ease-out;
 }
-.poem__line.is-now { opacity: 1; }
+/* the line being read, in Gracie's colour */
+.poem__line.is-now { color: var(--c-hair); }
+
+/* One word of the handwriting. The PNG is an alpha mask, not a picture of ink,
+   so the colour comes from the text colour and one file serves every context. */
+.hw__w {
+  display: inline-block;
+  width: var(--w);
+  height: var(--hw-h, 34px);
+  vertical-align: baseline;
+  background-color: currentColor;
+  -webkit-mask: var(--m) no-repeat center / contain;
+  mask: var(--m) no-repeat center / contain;
+}
 
 .player { display: flex; align-items: center; gap: 14px; }
 .player__btn {
